@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import {
-  Phone, Calendar, TrendingUp, Zap, PhoneCall, DollarSign,
+  Phone, Calendar, Percent, UserPlus, Coins, PhoneCall,
   ChevronRight, Clock, CheckCircle2, XCircle, PhoneMissed,
   ArrowUpRight, Sparkles,
 } from 'lucide-react'
@@ -20,9 +20,9 @@ const kpiCards = [
   { title: "Today's Calls", value: 94, change: 12.4, changeType: 'increase' as const, icon: Phone, color: 'navy' as const, changePeriod: 'vs yesterday' },
   { title: 'Answer Rate', value: '70.2%', change: 2.1, changeType: 'increase' as const, icon: PhoneCall, color: 'cyan' as const, changePeriod: 'vs last week' },
   { title: 'Bookings Today', value: 14, change: 7.7, changeType: 'increase' as const, icon: Calendar, color: 'green' as const, changePeriod: 'vs yesterday' },
-  { title: 'Conversion Rate', value: '16.7%', change: 1.2, changeType: 'increase' as const, icon: TrendingUp, color: 'purple' as const, changePeriod: 'vs last week' },
-  { title: 'Upgrade Leads', value: 28, change: 4.2, changeType: 'increase' as const, icon: Zap, color: 'amber' as const, changePeriod: 'active pipeline' },
-  { title: 'Revenue Impact', value: '$2.63M', change: 8.9, changeType: 'increase' as const, icon: DollarSign, color: 'green' as const, changePeriod: 'projected Q2' },
+  { title: 'Conversion Rate', value: '16.7%', change: 1.2, changeType: 'increase' as const, icon: Percent, color: 'purple' as const, changePeriod: 'vs last week' },
+  { title: 'Upgrade Leads', value: 28, change: 4.2, changeType: 'increase' as const, icon: UserPlus, color: 'amber' as const, changePeriod: 'active pipeline' },
+  { title: 'Revenue Impact', value: '$2.63M', change: 8.9, changeType: 'increase' as const, icon: Coins, color: 'green' as const, changePeriod: 'projected Q2' },
 ]
 
 const pieData = [
@@ -59,7 +59,7 @@ const recentActivity = [
   { icon: Phone, color: 'text-blue-500', text: 'Sarah Thompson — callback scheduled for 25 Jun', time: '45 min ago' },
   { icon: XCircle, color: 'text-slate-400', text: 'Michael Patel — not interested, follow up Aug', time: '1h ago' },
   { icon: PhoneMissed, color: 'text-amber-500', text: 'Emma Chen — no answer, retry attempt 2', time: '2h ago' },
-  { icon: Zap, color: 'text-cyan-500', text: 'New campaign launched: HiLux Service Reminder Q2', time: '3h ago' },
+  { icon: Sparkles, color: 'text-cyan-500', text: 'New campaign launched: HiLux Service Reminder Q2', time: '3h ago' },
 ]
 
 const CustomTooltip = ({ active, payload, label }: any) => {
