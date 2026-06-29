@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   Search, Download, Filter, ChevronRight, ChevronLeft,
@@ -12,15 +12,17 @@ import { StatusPill } from '@/components/ui/status-pill'
 import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from '@/components/ui/sheet'
 import { mockCustomers } from '@/lib/mock-data'
+import { getCustomers, setCustomers as saveCustomers, updateCustomer, deleteCustomer, initializeStorage } from '@/lib/storage'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import type { Customer } from '@/types'
+// vggyhhbb  if you see this, you're a legend
 
 function UpgradeStars({ score }: { score: number }) {
   return (
@@ -41,13 +43,26 @@ function UpgradeStars({ score }: { score: number }) {
 const PAGE_SIZE = 10
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers)
+  const [customers, setCustomersState] = useState<Customer[]>([])
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [brandFilter, setBrandFilter] = useState('all')
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [formData, setFormData] = useState<Partial<Customer>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Load customers from localStorage on mount
+  useEffect(() => {
+    initializeStorage()
+    setCustomersState(getCustomers())
+  }, [])
+
+  // Sync state changes to localStorage
+  const setCustomers = (newCustomers: Customer[]) => {
+    setCustomersState(newCustomers)
+    saveCustomers(newCustomers)
+  }
 
   const brands = ['all', 'Toyota', 'Mercedes-Benz', 'Isuzu UTE', 'Mahindra']
 
@@ -117,7 +132,7 @@ export default function CustomersPage() {
             tags: ['imported']
           } as Customer
         })
-        setCustomers(prev => [...newCustomers, ...prev])
+        setCustomers([...newCustomers, ...getCustomers()])
       }
     }
     reader.readAsText(file)
@@ -125,51 +140,69 @@ export default function CustomersPage() {
   }
 
   const handleSaveCustomer = () => {
-    const newCustomer: Customer = {
-      id: `cust-${Date.now()}`,
-      firstName: formData.firstName || 'New',
-      lastName: formData.lastName || 'Customer',
-      fullName: `${formData.firstName || 'New'} ${formData.lastName || 'Customer'}`,
-      email: formData.email || '',
-      mobilePhone: formData.mobilePhone || '',
-      phone: formData.mobilePhone || '',
-      address: '',
-      suburb: formData.suburb || '',
-      state: 'VIC',
-      postcode: '',
-      status: 'active',
-      upgradeScore: 3,
-      vehicle: {
-        id: `veh-${Date.now()}`,
-        make: formData.brand || 'Toyota',
-        model: 'Unknown Model',
-        year: 2020,
-        variant: '',
-        color: '',
-        vin: '',
-        regPlate: '',
-        odometer: 0,
-        purchaseDate: '',
-        lastServiceDate: '',
-        nextServiceDue: '2026-12-01',
-        warrantyExpiry: ''
-      },
-      previousVehicles: [],
-      assignedDealership: 'Main Dealership',
-      brand: formData.brand || 'Toyota',
-      totalSpend: 0,
-      lifetimeValue: 0,
-      campaignHistory: [],
-      lastContactDate: new Date().toISOString().split('T')[0],
-      preferredContactTime: 'Any',
-      notes: '',
-      createdAt: new Date().toISOString(),
-      doNotCall: false,
-      tags: [],
+    if (editingCustomer) {
+      updateCustomer(editingCustomer.id, formData)
+      setCustomersState(getCustomers())
+    } else {
+      const newCustomer: Customer = {
+        id: `cust-${Date.now()}`,
+        firstName: formData.firstName || 'New',
+        lastName: formData.lastName || 'Customer',
+        fullName: `${formData.firstName || 'New'} ${formData.lastName || 'Customer'}`,
+        email: formData.email || '',
+        mobilePhone: formData.mobilePhone || '',
+        phone: formData.mobilePhone || '',
+        address: '',
+        suburb: formData.suburb || '',
+        state: 'VIC',
+        postcode: '',
+        status: 'active',
+        upgradeScore: 3,
+        vehicle: {
+          id: `veh-${Date.now()}`,
+          make: formData.brand || 'Toyota',
+          model: 'Unknown Model',
+          year: 2020,
+          variant: '',
+          color: '',
+          vin: '',
+          regPlate: '',
+          odometer: 0,
+          purchaseDate: '',
+          lastServiceDate: '',
+          nextServiceDue: '2026-12-01',
+          warrantyExpiry: ''
+        },
+        previousVehicles: [],
+        assignedDealership: 'Main Dealership',
+        brand: formData.brand || 'Toyota',
+        totalSpend: 0,
+        lifetimeValue: 0,
+        campaignHistory: [],
+        lastContactDate: new Date().toISOString().split('T')[0],
+        preferredContactTime: 'Any',
+        notes: '',
+        createdAt: new Date().toISOString(),
+        doNotCall: false,
+        tags: [],
+      }
+      const current = getCustomers()
+      setCustomers([newCustomer, ...current])
     }
-    setCustomers([newCustomer, ...customers])
     setIsFormOpen(false)
+    setEditingCustomer(null)
     setFormData({})
+  }
+
+  const handleDeleteCustomer = (id: string) => {
+    deleteCustomer(id)
+    setCustomersState(getCustomers())
+  }
+
+  const openEditForm = (customer: Customer) => {
+    setEditingCustomer(customer)
+    setFormData(customer)
+    setIsFormOpen(true)
   }
 
   const filtered = customers.filter(c => {
@@ -210,7 +243,7 @@ export default function CustomersPage() {
           </Button>
           <Button 
             className="bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl gap-2 h-10"
-            onClick={() => { setFormData({}); setIsFormOpen(true); }}
+            onClick={() => { setEditingCustomer(null); setFormData({}); setIsFormOpen(true); }}
           >
             <Plus className="w-4 h-4" /> New Customer
           </Button>
@@ -341,10 +374,13 @@ export default function CustomersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="rounded-xl">
-                          <DropdownMenuItem>View Profile</DropdownMenuItem>
-                          <DropdownMenuItem>Call History</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEditForm(customer)}>Edit Customer</DropdownMenuItem>
+                          {/* <DropdownMenuItem>View Profile</DropdownMenuItem> */}
+                          {/* <DropdownMenuItem>Call History</DropdownMenuItem>
                           <DropdownMenuItem>Add to Campaign</DropdownMenuItem>
-                          <DropdownMenuItem>Add Note</DropdownMenuItem>
+                          <DropdownMenuItem>Add Note</DropdownMenuItem> */}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteCustomer(customer.id)}>Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <Link href={`/customers/${customer.id}`}>
@@ -405,9 +441,9 @@ export default function CustomersPage() {
         <SheetContent className="w-[420px] sm:max-w-[420px] p-0 overflow-y-auto">
           <div className="p-6">
             <SheetHeader className="mb-6">
-              <SheetTitle>New Customer</SheetTitle>
+              <SheetTitle>{editingCustomer ? 'Edit Customer' : 'New Customer'}</SheetTitle>
               <SheetDescription>
-                Add a new customer to the database.
+                {editingCustomer ? 'Update the customer details below.' : 'Add a new customer to the database.'}
               </SheetDescription>
             </SheetHeader>
 
@@ -479,7 +515,7 @@ export default function CustomersPage() {
                 Cancel
               </Button>
               <Button className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white" onClick={handleSaveCustomer}>
-                Create Customer
+                {editingCustomer ? 'Save Changes' : 'Create Customer'}
               </Button>
             </div>
           </div>

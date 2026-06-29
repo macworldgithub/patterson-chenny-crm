@@ -476,7 +476,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -517,6 +517,7 @@ import {
 } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
 import { mockCampaigns } from "@/lib/mock-data";
+import { getCampaigns, setCampaigns as saveCampaigns, updateCampaign, deleteCampaign, initializeStorage } from "@/lib/storage";
 import type { Campaign } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -529,7 +530,7 @@ const typeLabels: Record<string, string> = {
 };
 
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
+  const [campaigns, setCampaignsState] = useState<Campaign[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
     null,
@@ -539,6 +540,18 @@ export default function CampaignsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [formData, setFormData] = useState<Partial<Campaign>>({});
+
+  // Load campaigns from localStorage on mount
+  useEffect(() => {
+    initializeStorage();
+    setCampaignsState(getCampaigns());
+  }, []);
+
+  // Sync state changes to localStorage
+  const setCampaigns = (newCampaigns: Campaign[]) => {
+    setCampaignsState(newCampaigns);
+    saveCampaigns(newCampaigns);
+  };
 
   const handleExport = () => {
     const csvContent =
@@ -559,17 +572,15 @@ export default function CampaignsPage() {
   };
 
   const handleDelete = (id: string) => {
-    setCampaigns(campaigns.filter((c) => c.id !== id));
+    deleteCampaign(id);
+    setCampaignsState(getCampaigns());
     if (selectedCampaign?.id === id) setSelectedCampaign(null);
   };
 
   const handleSaveCampaign = () => {
     if (editingCampaign) {
-      setCampaigns(
-        campaigns.map((c) =>
-          c.id === editingCampaign.id ? ({ ...c, ...formData } as Campaign) : c,
-        ),
-      );
+      updateCampaign(editingCampaign.id, formData);
+      setCampaignsState(getCampaigns());
     } else {
       const newCampaign: Campaign = {
         id: `camp-${Date.now()}`,
@@ -597,7 +608,8 @@ export default function CampaignsPage() {
         script: "",
         tags: [],
       };
-      setCampaigns([newCampaign, ...campaigns]);
+      const current = getCampaigns();
+      setCampaigns([newCampaign, ...current]);
     }
     setIsFormOpen(false);
     setEditingCampaign(null);
@@ -838,7 +850,7 @@ export default function CampaignsPage() {
                             >
                               Edit Campaign
                             </DropdownMenuItem>
-                            {campaign.status === "active" ? (
+                            {/* {campaign.status === "active" ? (
                               <DropdownMenuItem
                                 onClick={() =>
                                   setCampaigns(
@@ -866,7 +878,7 @@ export default function CampaignsPage() {
                               >
                                 Resume Campaign
                               </DropdownMenuItem>
-                            ) : null}
+                            ) : null} */}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-destructive"

@@ -11,16 +11,18 @@ const DropdownMenuTrigger = MenuPrimitive.Trigger
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof MenuPrimitive.Portal>,
   React.ComponentPropsWithoutRef<typeof MenuPrimitive.Portal>
->(({ className, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => (
   <MenuPrimitive.Portal ref={ref}>
-    <MenuPrimitive.Popup
-      className={cn(
-        'z-50 min-w-[8rem] overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md outline-none',
-        className
-      )}
-    >
-      {props.children}
-    </MenuPrimitive.Popup>
+    <MenuPrimitive.Positioner className="z-50">
+      <MenuPrimitive.Popup
+        className={cn(
+          'min-w-[8rem] overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md outline-none',
+          className
+        )}
+      >
+        {children}
+      </MenuPrimitive.Popup>
+    </MenuPrimitive.Positioner>
   </MenuPrimitive.Portal>
 ))
 DropdownMenuContent.displayName = MenuPrimitive.Portal.displayName
