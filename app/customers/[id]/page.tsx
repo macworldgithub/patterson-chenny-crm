@@ -1,6 +1,6 @@
 'use client'
 
-import { use } from 'react'
+import { use, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   ChevronLeft, Phone, Mail, MapPin, Car, Star, Clock,
@@ -9,9 +9,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StatusPill } from '@/components/ui/status-pill'
-import { mockCustomers, mockCalls } from '@/lib/mock-data'
+import { getCustomers, initializeStorage } from '@/lib/storage'
+import { mockCalls } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import type { Customer } from '@/types'
 
 function UpgradeStars({ score }: { score: number }) {
   return (
@@ -25,7 +27,23 @@ function UpgradeStars({ score }: { score: number }) {
 
 export default function CustomerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const customer = mockCustomers.find(c => c.id === id) ?? mockCustomers[0]
+  const [customer, setCustomer] = useState<Customer | null>(null)
+
+  useEffect(() => {
+    initializeStorage()
+    const customers = getCustomers()
+    const found = customers.find(c => c.id === id) || customers[0]
+    setCustomer(found)
+  }, [id])
+
+  if (!customer) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-muted-foreground text-sm animate-pulse">Loading profile...</div>
+      </div>
+    )
+  }
+
   const customerCalls = mockCalls.filter(c => c.customerId === customer.id)
 
   return (
