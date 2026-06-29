@@ -53,7 +53,7 @@ export function TopBar() {
         </button>
 
         {/* Campaign selector */}
-        <Select defaultValue={campaigns[0]}>
+        {/* <Select defaultValue={campaigns[0]}>
           <SelectTrigger className="h-9 w-[220px] text-xs border-border hidden lg:flex">
             <SelectValue />
           </SelectTrigger>
@@ -64,17 +64,17 @@ export function TopBar() {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
+        </Select> */}
 
         <div className="flex items-center gap-2 ml-auto">
           {/* Quick create */}
-          <Button
+          {/* <Button
             size="sm"
             className="h-9 gap-1.5 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl text-xs font-medium px-4 hidden sm:flex"
           >
             <Plus className="w-3.5 h-3.5" />
             New Campaign
-          </Button>
+          </Button> */}
 
           {/* Theme toggle */}
           <button
