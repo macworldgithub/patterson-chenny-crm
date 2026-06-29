@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   Search, Download, Filter, ChevronRight, ChevronLeft,
-  Star, Phone, Car, CalendarClock, MoreHorizontal,
+  Star, Phone, Car, CalendarClock, MoreHorizontal, Plus, Upload
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,9 +14,13 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
+} from '@/components/ui/sheet'
 import { mockCustomers } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import type { Customer } from '@/types'
 
 function UpgradeStars({ score }: { score: number }) {
   return (
@@ -37,13 +41,138 @@ function UpgradeStars({ score }: { score: number }) {
 const PAGE_SIZE = 10
 
 export default function CustomersPage() {
+  const [customers, setCustomers] = useState<Customer[]>(mockCustomers)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [brandFilter, setBrandFilter] = useState('all')
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [formData, setFormData] = useState<Partial<Customer>>({})
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const brands = ['all', 'Toyota', 'Mercedes-Benz', 'Isuzu UTE', 'Mahindra']
 
-  const filtered = mockCustomers.filter(c => {
+  const handleExport = () => {
+    const csvContent = "id,fullName,email,mobilePhone,suburb,make,model,year\n" 
+      + customers.map(c => `"${c.id}","${c.fullName}","${c.email}","${c.mobilePhone}","${c.suburb}","${c.vehicle?.make || ''}","${c.vehicle?.model || ''}",${c.vehicle?.year || ''}`).join("\n")
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'customers.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const text = event.target?.result as string
+      const lines = text.split('\n').filter(line => line.trim())
+      if (lines.length > 1) {
+        // Simple mock parse, skipping header
+        const newCustomers: Customer[] = lines.slice(1).map((line, i) => {
+          const cols = line.split(',').map(c => c.replace(/^"|"$/g, ''))
+          return {
+            id: `cust-imported-${Date.now()}-${i}`,
+            firstName: cols[1]?.split(' ')[0] || 'Imported',
+            lastName: cols[1]?.split(' ').slice(1).join(' ') || 'Customer',
+            fullName: cols[1] || 'Imported Customer',
+            email: cols[2] || '',
+            mobilePhone: cols[3] || '',
+            phone: cols[3] || '',
+            suburb: cols[4] || '',
+            address: '',
+            state: 'VIC',
+            postcode: '',
+            status: 'active',
+            upgradeScore: 3,
+            brand: cols[5] || 'Toyota',
+            vehicle: {
+              id: `veh-imported-${Date.now()}-${i}`,
+              make: cols[5] || '',
+              model: cols[6] || '',
+              year: parseInt(cols[7]) || 2020,
+              variant: '',
+              color: '',
+              vin: '',
+              regPlate: '',
+              odometer: 0,
+              purchaseDate: '',
+              lastServiceDate: '',
+              nextServiceDue: '2026-10-10',
+              warrantyExpiry: ''
+            },
+            previousVehicles: [],
+            assignedDealership: 'Imported',
+            totalSpend: 0,
+            lifetimeValue: 0,
+            campaignHistory: [],
+            lastContactDate: new Date().toISOString().split('T')[0],
+            preferredContactTime: 'Morning',
+            notes: 'Imported via CSV',
+            createdAt: new Date().toISOString(),
+            doNotCall: false,
+            tags: ['imported']
+          } as Customer
+        })
+        setCustomers(prev => [...newCustomers, ...prev])
+      }
+    }
+    reader.readAsText(file)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleSaveCustomer = () => {
+    const newCustomer: Customer = {
+      id: `cust-${Date.now()}`,
+      firstName: formData.firstName || 'New',
+      lastName: formData.lastName || 'Customer',
+      fullName: `${formData.firstName || 'New'} ${formData.lastName || 'Customer'}`,
+      email: formData.email || '',
+      mobilePhone: formData.mobilePhone || '',
+      phone: formData.mobilePhone || '',
+      address: '',
+      suburb: formData.suburb || '',
+      state: 'VIC',
+      postcode: '',
+      status: 'active',
+      upgradeScore: 3,
+      vehicle: {
+        id: `veh-${Date.now()}`,
+        make: formData.brand || 'Toyota',
+        model: 'Unknown Model',
+        year: 2020,
+        variant: '',
+        color: '',
+        vin: '',
+        regPlate: '',
+        odometer: 0,
+        purchaseDate: '',
+        lastServiceDate: '',
+        nextServiceDue: '2026-12-01',
+        warrantyExpiry: ''
+      },
+      previousVehicles: [],
+      assignedDealership: 'Main Dealership',
+      brand: formData.brand || 'Toyota',
+      totalSpend: 0,
+      lifetimeValue: 0,
+      campaignHistory: [],
+      lastContactDate: new Date().toISOString().split('T')[0],
+      preferredContactTime: 'Any',
+      notes: '',
+      createdAt: new Date().toISOString(),
+      doNotCall: false,
+      tags: [],
+    }
+    setCustomers([newCustomer, ...customers])
+    setIsFormOpen(false)
+    setFormData({})
+  }
+
+  const filtered = customers.filter(c => {
     const matchSearch =
       c.fullName.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -63,11 +192,29 @@ export default function CustomersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Customers</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{mockCustomers.length} customers in database</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{customers.length} customers in database</p>
         </div>
-        <Button variant="outline" className="rounded-xl gap-2 h-10">
-          <Download className="w-4 h-4" /> Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <input 
+            type="file" 
+            accept=".csv" 
+            ref={fileInputRef} 
+            onChange={handleImport} 
+            className="hidden" 
+          />
+          <Button variant="outline" className="rounded-xl gap-2 h-10" onClick={() => fileInputRef.current?.click()}>
+            <Upload className="w-4 h-4" /> Import CSV
+          </Button>
+          <Button variant="outline" className="rounded-xl gap-2 h-10" onClick={handleExport}>
+            <Download className="w-4 h-4" /> Export CSV
+          </Button>
+          <Button 
+            className="bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl gap-2 h-10"
+            onClick={() => { setFormData({}); setIsFormOpen(true); }}
+          >
+            <Plus className="w-4 h-4" /> New Customer
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -252,6 +399,92 @@ export default function CustomersPage() {
           </div>
         </div>
       </div>
+
+      {/* New Customer Sheet */}
+      <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <SheetContent className="w-[420px] sm:max-w-[420px] p-0 overflow-y-auto">
+          <div className="p-6">
+            <SheetHeader className="mb-6">
+              <SheetTitle>New Customer</SheetTitle>
+              <SheetDescription>
+                Add a new customer to the database.
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">First Name</label>
+                  <Input 
+                    value={formData.firstName || ''} 
+                    onChange={e => setFormData({ ...formData, firstName: e.target.value })} 
+                    placeholder="John" 
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Last Name</label>
+                  <Input 
+                    value={formData.lastName || ''} 
+                    onChange={e => setFormData({ ...formData, lastName: e.target.value })} 
+                    placeholder="Doe" 
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-1 block">Email</label>
+                <Input 
+                  type="email"
+                  value={formData.email || ''} 
+                  onChange={e => setFormData({ ...formData, email: e.target.value })} 
+                  placeholder="john.doe@example.com" 
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Mobile Phone</label>
+                <Input 
+                  value={formData.mobilePhone || ''} 
+                  onChange={e => setFormData({ ...formData, mobilePhone: e.target.value })} 
+                  placeholder="0400 000 000" 
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Suburb</label>
+                <Input 
+                  value={formData.suburb || ''} 
+                  onChange={e => setFormData({ ...formData, suburb: e.target.value })} 
+                  placeholder="e.g. Chadstone" 
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Brand Interest / Owned</label>
+                <select 
+                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  value={formData.brand || 'Toyota'}
+                  onChange={e => setFormData({ ...formData, brand: e.target.value })}
+                >
+                  <option value="Toyota">Toyota</option>
+                  <option value="Mercedes-Benz">Mercedes-Benz</option>
+                  <option value="Isuzu UTE">Isuzu UTE</option>
+                  <option value="Mahindra">Mahindra</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-8 flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setIsFormOpen(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white" onClick={handleSaveCustomer}>
+                Create Customer
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
