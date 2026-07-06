@@ -36,71 +36,79 @@ export function useVoiceAgent(options: UseVoiceAgentOptions = {}) {
   })
 
   const socketRef = useRef<Socket | null>(null)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  // We use a plain object ref instead of MediaRecorder so we can store
+  // the ScriptProcessorNode-based recorder
+  const recorderRef = useRef<{ stop: () => void } | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const audioQueueRef = useRef<Float32Array[]>([])
   const isPlayingRef = useRef(false)
 
-  // Initialize Socket.IO connection
+  // ─── Socket.IO connection ───────────────────────────────────────────────────
   useEffect(() => {
     const socket = io(serverUrl, {
       transports: ['websocket', 'polling'],
     })
 
     socket.on('connect', () => {
-      console.log('Connected to voice agent server')
+      console.log('[Voice] Connected to voice agent server')
       setState(prev => ({ ...prev, isConnected: true, error: null }))
     })
 
     socket.on('disconnect', () => {
-      console.log('Disconnected from voice agent server')
-      setState(prev => ({ ...prev, isConnected: false }))
+      console.log('[Voice] Disconnected from voice agent server')
+      setState(prev => ({ ...prev, isConnected: false, isRecording: false }))
     })
 
-    socket.on('session-started', (data) => {
-      console.log('Session started:', data)
+    socket.on('session-started', (data: any) => {
+      console.log('[Voice] Session started:', data)
+      // session started means we are now "connected" to the AI session
+      setState(prev => ({ ...prev, isConnected: true }))
     })
 
-    socket.on('audio-delta', (data) => {
+    socket.on('audio-delta', (data: any) => {
       handleAudioDelta(data.delta)
     })
 
-    socket.on('transcript-delta', (data) => {
+    socket.on('transcript-delta', (data: any) => {
       setState(prev => ({ ...prev, agentTranscript: prev.agentTranscript + data.delta }))
     })
 
-    socket.on('transcript-done', (data) => {
-      console.log('Agent transcript complete:', data.transcript)
+    socket.on('transcript-done', (data: any) => {
+      console.log('[Voice] Agent transcript complete:', data.transcript)
+      // Reset agentTranscript so next turn starts fresh
+      setState(prev => ({ ...prev, agentTranscript: '' }))
     })
 
-    socket.on('user-transcript', (data) => {
-      console.log('User transcript:', data.transcript)
+    socket.on('user-transcript', (data: any) => {
+      console.log('[Voice] User transcript:', data.transcript)
       setState(prev => ({ ...prev, transcript: data.transcript }))
     })
 
     socket.on('speech-started', () => {
-      console.log('User started speaking')
+      console.log('[Voice] User started speaking')
       setState(prev => ({ ...prev, isSpeaking: true }))
     })
 
-    socket.on('call-logged', (data) => {
-      console.log('Call logged:', data)
+    socket.on('call-logged', (data: any) => {
+      console.log('[Voice] Call logged:', data)
       setState(prev => ({ ...prev, callLog: data }))
     })
 
-    socket.on('recording-saved', (data) => {
-      console.log('Recording saved:', data)
+    socket.on('recording-saved', (data: any) => {
+      console.log('[Voice] Recording saved:', data)
       setState(prev => ({ ...prev, recordingUrl: data.url }))
     })
 
-    socket.on('realtime-error', (data) => {
-      console.error('Realtime error:', data.error)
+    socket.on('realtime-error', (data: any) => {
+      console.error('[Voice] Realtime error:', data.error)
       setState(prev => ({ ...prev, error: data.error?.message || 'Unknown error' }))
     })
 
     socket.on('session-closed', () => {
-      console.log('Session closed')
-      setState(prev => ({ ...prev, isConnected: false, isRecording: false }))
+      console.log('[Voice] Session closed')
+      // Don't set isConnected to false — the socket is still connected,
+      // only the AI session ended. This prevents the "Disconnected" badge.
+      setState(prev => ({ ...prev, isRecording: false }))
     })
 
     socketRef.current = socket
@@ -113,35 +121,20 @@ export function useVoiceAgent(options: UseVoiceAgentOptions = {}) {
     }
   }, [serverUrl])
 
-  // Handle audio delta from ElevenLabs
-  const handleAudioDelta = useCallback(async (base64Audio: string) => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new AudioContext({ sampleRate: 16000 })
-    }
+  // ─── Playback: incoming audio from ElevenLabs ──────────────────────────────
 
-    try {
-      const audioData = base64ToFloat32(base64Audio)
-      audioQueueRef.current.push(audioData)
-
-      if (!isPlayingRef.current) {
-        playAudioQueue()
-      }
-    } catch (error) {
-      console.error('Error handling audio delta:', error)
-    }
-  }, [])
-
-  // Play audio queue
   const playAudioQueue = useCallback(async () => {
-    if (audioQueueRef.current.length === 0 || isPlayingRef.current) {
-      return
-    }
+    if (audioQueueRef.current.length === 0 || isPlayingRef.current) return
 
     isPlayingRef.current = true
     setState(prev => ({ ...prev, isPlaying: true }))
 
     const audioContext = audioContextRef.current
-    if (!audioContext) return
+    if (!audioContext) {
+      isPlayingRef.current = false
+      setState(prev => ({ ...prev, isPlaying: false }))
+      return
+    }
 
     while (audioQueueRef.current.length > 0) {
       const audioData = audioQueueRef.current.shift()
@@ -164,110 +157,141 @@ export function useVoiceAgent(options: UseVoiceAgentOptions = {}) {
     setState(prev => ({ ...prev, isPlaying: false }))
   }, [])
 
-  // Convert base64 to Float32Array
-  const base64ToFloat32 = (base64: string): Float32Array => {
-    const binaryString = atob(base64)
-    const bytes = new Uint8Array(binaryString.length)
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i)
+  const handleAudioDelta = useCallback(async (base64Audio: string) => {
+    // Lazily create the playback AudioContext on first audio delta so it is
+    // created after a user gesture (important for Safari / Chrome autoplay policy)
+    if (!audioContextRef.current) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+      audioContextRef.current = new AudioContextClass({ sampleRate: 16000 })
     }
-    
-    // Convert to 16-bit PCM
-    const pcm16 = new Int16Array(bytes.buffer)
-    
-    // Convert to Float32
-    const float32 = new Float32Array(pcm16.length)
-    for (let i = 0; i < pcm16.length; i++) {
-      float32[i] = pcm16[i] / 32768.0
-    }
-    
-    return float32
-  }
 
-  // Start voice session
+    try {
+      // Decode base64 → Int16 PCM → Float32
+      const binaryString = atob(base64Audio)
+      const bytes = new Uint8Array(binaryString.length)
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i)
+      }
+      const pcm16 = new Int16Array(bytes.buffer)
+      const float32 = new Float32Array(pcm16.length)
+      for (let i = 0; i < pcm16.length; i++) {
+        float32[i] = pcm16[i] / 32768.0
+      }
+
+      audioQueueRef.current.push(float32)
+      if (!isPlayingRef.current) {
+        playAudioQueue()
+      }
+    } catch (error) {
+      console.error('[Voice] Error handling audio delta:', error)
+    }
+  }, [playAudioQueue])
+
+  // ─── Start voice session ────────────────────────────────────────────────────
+
   const startSession = useCallback(() => {
     if (!socketRef.current) return
     socketRef.current.emit('start-session', { carContext })
   }, [carContext])
 
-  // Start recording
+  // ─── Microphone capture using ScriptProcessorNode (raw PCM16) ─────────────
+  // This replaces the old MediaRecorder approach which used decodeAudioData on
+  // incomplete WebM chunks — that is what was causing EncodingError crashes and
+  // the AI not receiving any audio after the greeting.
+
   const startRecording = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm'
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          sampleRate: 24000,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
       })
-      
-      mediaRecorderRef.current = mediaRecorder
-      
-      mediaRecorder.ondataavailable = async (event) => {
-        if (event.data.size > 0 && socketRef.current) {
-          const arrayBuffer = await event.data.arrayBuffer()
-          const base64 = btoa(
-            new Uint8Array(arrayBuffer).reduce(
-              (data, byte) => data + String.fromCharCode(byte),
-              ''
-            )
-          )
-          
-          // Convert to PCM16 for OpenAI
-          const audioContext = new AudioContext()
-          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
-          const pcmData = audioBufferToPCM16(audioBuffer)
-          const pcmBase64 = btoa(
-            new Uint8Array(pcmData).reduce(
-              (data, byte) => data + String.fromCharCode(byte),
-              ''
-            )
-          )
-          
-          socketRef.current.emit('audio-chunk', { audio: pcmBase64 })
+
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+      // 24 kHz matches OPENAI_INPUT_SAMPLE_RATE on the backend
+      const captureContext = new AudioContextClass({ sampleRate: 24000 })
+      const source = captureContext.createMediaStreamSource(stream)
+
+      // ScriptProcessorNode: bufferSize 4096, 1 input ch, 1 output ch
+      // ~170 ms per chunk at 24 kHz — safe and low-latency
+      const processor = captureContext.createScriptProcessor(4096, 1, 1)
+
+      processor.onaudioprocess = (e: AudioProcessingEvent) => {
+        if (!socketRef.current?.connected) return
+
+        const inputData = e.inputBuffer.getChannelData(0)
+        const pcm16 = new Int16Array(inputData.length)
+
+        for (let i = 0; i < inputData.length; i++) {
+          const s = Math.max(-1, Math.min(1, inputData[i]))
+          pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff
         }
+
+        // Encode PCM16 bytes as base64 in chunks to avoid call-stack overflow
+        const bytes = new Uint8Array(pcm16.buffer)
+        let binary = ''
+        const chunkSize = 8192
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode(...Array.from(bytes.subarray(i, i + chunkSize)))
+        }
+        const pcmBase64 = btoa(binary)
+
+        socketRef.current.emit('audio-chunk', { audio: pcmBase64 })
       }
-      
-      mediaRecorder.start(100) // Send chunks every 100ms
+
+      // Connect graph: microphone → processor → destination (silent output needed
+      // by the browser to keep the processor alive)
+      source.connect(processor)
+      processor.connect(captureContext.destination)
+
+      recorderRef.current = {
+        stop: () => {
+          try {
+            source.disconnect()
+            processor.disconnect()
+          } catch (_) {}
+          if (captureContext.state !== 'closed') {
+            captureContext.close().catch(() => {})
+          }
+          stream.getTracks().forEach(t => t.stop())
+        },
+      }
+
       setState(prev => ({ ...prev, isRecording: true, error: null }))
-    } catch (error) {
-      console.error('Error starting recording:', error)
-      setState(prev => ({ ...prev, error: 'Failed to access microphone' }))
+    } catch (error: any) {
+      console.error('[Voice] Error starting recording:', error)
+      setState(prev => ({
+        ...prev,
+        error: error?.name === 'NotAllowedError'
+          ? 'Microphone permission denied — please allow mic access and try again'
+          : 'Failed to access microphone',
+      }))
     }
   }, [])
 
-  // Stop recording
+  // ─── Stop recording ─────────────────────────────────────────────────────────
+
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop()
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop())
-      mediaRecorderRef.current = null
+    if (recorderRef.current) {
+      recorderRef.current.stop()
+      recorderRef.current = null
       setState(prev => ({ ...prev, isRecording: false }))
     }
   }, [])
 
-  // End session
+  // ─── End session ────────────────────────────────────────────────────────────
+
   const endSession = useCallback(() => {
     stopRecording()
     if (socketRef.current) {
       socketRef.current.emit('end-session')
     }
+    setState(prev => ({ ...prev, agentTranscript: '', transcript: '', callLog: null }))
   }, [stopRecording])
-
-  // Convert AudioBuffer to PCM16
-  const audioBufferToPCM16 = (audioBuffer: AudioBuffer): ArrayBuffer => {
-    const numberOfChannels = audioBuffer.numberOfChannels
-    const length = audioBuffer.length
-    const result = new Int16Array(length * numberOfChannels)
-    
-    for (let channel = 0; channel < numberOfChannels; channel++) {
-      const channelData = audioBuffer.getChannelData(channel)
-      for (let i = 0; i < length; i++) {
-        const sample = Math.max(-1, Math.min(1, channelData[i]))
-        result[i * numberOfChannels + channel] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF
-      }
-    }
-    
-    return result.buffer
-  }
 
   return {
     ...state,
