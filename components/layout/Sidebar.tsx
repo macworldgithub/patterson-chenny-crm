@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Megaphone,
@@ -20,37 +20,61 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
-} from 'lucide-react'
-import { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+} from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface NavItem {
-  href: string
-  label: string
-  icon: React.ElementType
-  badge?: number | string
-  section?: string
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  badge?: number | string;
+  section?: string;
 }
 
 const navItems: NavItem[] = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard, section: 'main' },
-  { href: '/campaigns', label: 'Campaigns', icon: Megaphone, section: 'main' },
-  { href: '/customers', label: 'Customers', icon: Users, section: 'main' },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard, section: "main" },
+  { href: "/campaigns", label: "Campaigns", icon: Megaphone, section: "main" },
+  { href: "/customers", label: "Customers", icon: Users, section: "main" },
   // { href: '/calls', label: 'Calls', icon: Phone, section: 'main' },
-  { href: '/simulation', label: 'Simulation Mode', icon: FlaskConical, section: 'main' },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3, section: 'main' },
-  { href: '/notifications', label: 'Notifications', icon: Bell, badge: 3, section: 'main' },
-  { href: '/integrations', label: 'Integrations', icon: Plug, section: 'admin' },
-  { href: '/users', label: 'Users', icon: UserCog, section: 'admin' },
-  { href: '/roles', label: 'Roles & Permissions', icon: ShieldCheck, section: 'admin' },
-  { href: '/audit-logs', label: 'Audit Logs', icon: ScrollText, section: 'admin' },
-  { href: '/settings', label: 'Settings', icon: Settings, section: 'admin' },
-]
+  {
+    href: "/simulation",
+    label: "Simulation Mode",
+    icon: FlaskConical,
+    section: "main",
+  },
+  // {
+  //   href: "/integrations",
+  //   label: "Integrations",
+  //   icon: Plug,
+  //   section: "admin",
+  // },
+  // { href: "/users", label: "Users", icon: UserCog, section: "admin" },
+  // {
+  //   href: "/roles",
+  //   label: "Roles & Permissions",
+  //   icon: ShieldCheck,
+  //   section: "admin",
+  // },
+  // {
+  //   href: "/audit-logs",
+  //   label: "Audit Logs",
+  //   icon: ScrollText,
+  //   section: "admin",
+  // },
+  // { href: "/settings", label: "Settings", icon: Settings, section: "admin" },
+  ,
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
+  const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <TooltipProvider>
@@ -73,8 +97,12 @@ export function Sidebar() {
                 transition={{ duration: 0.15 }}
                 className="flex flex-col min-w-0"
               >
-                <span className="text-white font-semibold text-sm leading-tight truncate">OmniSuiteAI</span>
-                <span className="text-slate-400 text-xs truncate">Patterson Cheney</span>
+                <span className="text-white font-semibold text-sm leading-tight truncate">
+                  OmniSuiteAI
+                </span>
+                <span className="text-slate-400 text-xs truncate">
+                  Patterson Cheney
+                </span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -88,31 +116,37 @@ export function Sidebar() {
               Main
             </p>
           )}
-          {navItems.filter(i => i.section === 'main').map((item) => (
-            <SidebarItem
-              key={item.href}
-              item={item}
-              isActive={pathname === item.href}
-              collapsed={collapsed}
-            />
-          ))}
+          {navItems
+            .filter((i) => i.section === "main")
+            .map((item) => (
+              <SidebarItem
+                key={item.href}
+                item={item}
+                isActive={pathname === item.href}
+                collapsed={collapsed}
+              />
+            ))}
 
           <div className="my-3 mx-2 border-t border-white/8" />
 
           {/* Admin section */}
-          {!collapsed && (
+          {/* {!collapsed && (
             <p className="text-slate-500 text-[10px] font-semibold uppercase tracking-widest px-3 mb-2">
               Admin
             </p>
-          )}
-          {navItems.filter(i => i.section === 'admin').map((item) => (
-            <SidebarItem
-              key={item.href}
-              item={item}
-              isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
-              collapsed={collapsed}
-            />
-          ))}
+          )} */}
+          {navItems
+            .filter((i) => i.section === "admin")
+            .map((item) => (
+              <SidebarItem
+                key={item.href}
+                item={item}
+                isActive={
+                  pathname === item.href || pathname.startsWith(item.href + "/")
+                }
+                collapsed={collapsed}
+              />
+            ))}
         </nav>
 
         {/* Collapse toggle */}
@@ -133,7 +167,7 @@ export function Sidebar() {
         </div>
       </motion.aside>
     </TooltipProvider>
-  )
+  );
 }
 
 function SidebarItem({
@@ -141,26 +175,28 @@ function SidebarItem({
   isActive,
   collapsed,
 }: {
-  item: NavItem
-  isActive: boolean
-  collapsed: boolean
+  item: NavItem;
+  isActive: boolean;
+  collapsed: boolean;
 }) {
-  const Icon = item.icon
+  const Icon = item.icon;
 
   const content = (
     <Link
       href={item.href}
       className={cn(
-        'flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-150 group relative',
+        "flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-150 group relative",
         isActive
-          ? 'bg-cyan-500/15 text-white border-l-2 border-cyan-400 pl-[10px]'
-          : 'text-slate-400 hover:text-white hover:bg-white/6 border-l-2 border-transparent'
+          ? "bg-cyan-500/15 text-white border-l-2 border-cyan-400 pl-[10px]"
+          : "text-slate-400 hover:text-white hover:bg-white/6 border-l-2 border-transparent",
       )}
     >
       <Icon
         className={cn(
-          'w-4.5 h-4.5 shrink-0 transition-colors',
-          isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200'
+          "w-4.5 h-4.5 shrink-0 transition-colors",
+          isActive
+            ? "text-cyan-400"
+            : "text-slate-400 group-hover:text-slate-200",
         )}
       />
       <AnimatePresence>
@@ -188,11 +224,11 @@ function SidebarItem({
         <motion.div
           layoutId="sidebar-active"
           className="absolute inset-0 rounded-xl bg-cyan-500/10 -z-10"
-          transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+          transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
         />
       )}
     </Link>
-  )
+  );
 
   if (collapsed) {
     return (
@@ -203,8 +239,8 @@ function SidebarItem({
           {item.badge && ` (${item.badge})`}
         </TooltipContent>
       </Tooltip>
-    )
+    );
   }
 
-  return content
+  return content;
 }

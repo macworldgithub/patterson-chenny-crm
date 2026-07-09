@@ -1,66 +1,156 @@
-'use client'
+"use client";
 
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion";
 import {
-  Phone, Calendar, Percent, UserPlus, Coins, PhoneCall,
-  ChevronRight, Clock, CheckCircle2, XCircle, PhoneMissed,
-  ArrowUpRight, Sparkles,
-} from 'lucide-react'
-import { StatCard } from '@/components/ui/stat-card'
-import { StatusPill } from '@/components/ui/status-pill'
+  Phone,
+  Calendar,
+  Percent,
+  UserPlus,
+  Coins,
+  PhoneCall,
+  ChevronRight,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  PhoneMissed,
+  ArrowUpRight,
+  Sparkles,
+} from "lucide-react";
+import { StatCard } from "@/components/ui/stat-card";
+import { StatusPill } from "@/components/ui/status-pill";
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell,
-} from 'recharts'
-import { mockCampaigns, mockCalls, mockDailyMetrics } from '@/lib/mock-data'
-import { cn } from '@/lib/utils'
-import Link from 'next/link'
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { mockCampaigns, mockCalls, mockDailyMetrics } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const kpiCards = [
-  { title: "Today's Calls", value: 94, change: 12.4, changeType: 'increase' as const, icon: Phone, color: 'navy' as const, changePeriod: 'vs yesterday' },
-  { title: 'Answer Rate', value: '70.2%', change: 2.1, changeType: 'increase' as const, icon: PhoneCall, color: 'cyan' as const, changePeriod: 'vs last week' },
-  { title: 'Bookings Today', value: 14, change: 7.7, changeType: 'increase' as const, icon: Calendar, color: 'green' as const, changePeriod: 'vs yesterday' },
-  { title: 'Conversion Rate', value: '16.7%', change: 1.2, changeType: 'increase' as const, icon: Percent, color: 'purple' as const, changePeriod: 'vs last week' },
-  { title: 'Upgrade Leads', value: 28, change: 4.2, changeType: 'increase' as const, icon: UserPlus, color: 'amber' as const, changePeriod: 'active pipeline' },
-  { title: 'Revenue Impact', value: '$2.63M', change: 8.9, changeType: 'increase' as const, icon: Coins, color: 'green' as const, changePeriod: 'projected Q2' },
-]
+  {
+    title: "Today's Calls",
+    value: 94,
+    change: 12.4,
+    changeType: "increase" as const,
+    icon: Phone,
+    color: "navy" as const,
+    changePeriod: "vs yesterday",
+  },
+  {
+    title: "Answer Rate",
+    value: "70.2%",
+    change: 2.1,
+    changeType: "increase" as const,
+    icon: PhoneCall,
+    color: "cyan" as const,
+    changePeriod: "vs last week",
+  },
+  {
+    title: "Bookings Today",
+    value: 14,
+    change: 7.7,
+    changeType: "increase" as const,
+    icon: Calendar,
+    color: "green" as const,
+    changePeriod: "vs yesterday",
+  },
+  {
+    title: "Conversion Rate",
+    value: "16.7%",
+    change: 1.2,
+    changeType: "increase" as const,
+    icon: Percent,
+    color: "purple" as const,
+    changePeriod: "vs last week",
+  },
+  {
+    title: "Upgrade Leads",
+    value: 28,
+    change: 4.2,
+    changeType: "increase" as const,
+    icon: UserPlus,
+    color: "amber" as const,
+    changePeriod: "active pipeline",
+  },
+];
 
 const pieData = [
-  { name: 'Booked', value: 134, color: '#10B981' },
-  { name: 'Callback', value: 89, color: '#8B5CF6' },
-  { name: 'Not Interested', value: 210, color: '#6B7280' },
-  { name: 'No Answer', value: 179, color: '#F59E0B' },
-]
+  { name: "Booked", value: 134, color: "#10B981" },
+  { name: "Callback", value: 89, color: "#8B5CF6" },
+  { name: "Not Interested", value: 210, color: "#6B7280" },
+  { name: "No Answer", value: 179, color: "#F59E0B" },
+];
 
 const aiInsights = [
   {
-    title: 'Peak Call Window Detected',
-    body: 'Answer rates are 23% higher between 10:00–11:30am on weekdays. Consider scheduling more calls in this window.',
-    tag: 'Optimisation',
-    tagColor: 'text-cyan-600 bg-cyan-50 dark:bg-cyan-950/40 dark:text-cyan-400',
+    title: "Peak Call Window Detected",
+    body: "Answer rates are 23% higher between 10:00–11:30am on weekdays. Consider scheduling more calls in this window.",
+    tag: "Optimisation",
+    tagColor: "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/40 dark:text-cyan-400",
   },
   {
-    title: 'Emma Chen — Upgrade Alert',
-    body: 'Customer Emma Chen (Mercedes C-Class) has a 5/5 upgrade score. Finance ends September 2026. Recommend immediate outreach.',
-    tag: 'Lead Alert',
-    tagColor: 'text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400',
+    title: "Emma Chen — Upgrade Alert",
+    body: "Customer Emma Chen (Mercedes C-Class) has a 5/5 upgrade score. Finance ends September 2026. Recommend immediate outreach.",
+    tag: "Lead Alert",
+    tagColor:
+      "text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400",
   },
   {
-    title: 'Campaign Health Warning',
-    body: 'Isuzu D-Max Finance Renewal campaign has dropped below 50% answer rate. Review call scheduling and contact list quality.',
-    tag: 'Warning',
-    tagColor: 'text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400',
+    title: "Campaign Health Warning",
+    body: "Isuzu D-Max Finance Renewal campaign has dropped below 50% answer rate. Review call scheduling and contact list quality.",
+    tag: "Warning",
+    tagColor: "text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400",
   },
-]
+];
 
 const recentActivity = [
-  { icon: CheckCircle2, color: 'text-emerald-500', text: 'James Nguyen booked a service — HiLux SR5', time: '2 min ago' },
-  { icon: CheckCircle2, color: 'text-emerald-500', text: 'Lisa Moran booked a service — RAV4 Hybrid', time: '28 min ago' },
-  { icon: Phone, color: 'text-blue-500', text: 'Sarah Thompson — callback scheduled for 25 Jun', time: '45 min ago' },
-  { icon: XCircle, color: 'text-slate-400', text: 'Michael Patel — not interested, follow up Aug', time: '1h ago' },
-  { icon: PhoneMissed, color: 'text-amber-500', text: 'Emma Chen — no answer, retry attempt 2', time: '2h ago' },
-  { icon: Sparkles, color: 'text-cyan-500', text: 'New campaign launched: HiLux Service Reminder Q2', time: '3h ago' },
-]
+  {
+    icon: CheckCircle2,
+    color: "text-emerald-500",
+    text: "James Nguyen booked a service — HiLux SR5",
+    time: "2 min ago",
+  },
+  {
+    icon: CheckCircle2,
+    color: "text-emerald-500",
+    text: "Lisa Moran booked a service — RAV4 Hybrid",
+    time: "28 min ago",
+  },
+  {
+    icon: Phone,
+    color: "text-blue-500",
+    text: "Sarah Thompson — callback scheduled for 25 Jun",
+    time: "45 min ago",
+  },
+  {
+    icon: XCircle,
+    color: "text-slate-400",
+    text: "Michael Patel — not interested, follow up Aug",
+    time: "1h ago",
+  },
+  {
+    icon: PhoneMissed,
+    color: "text-amber-500",
+    text: "Emma Chen — no answer, retry attempt 2",
+    time: "2h ago",
+  },
+  {
+    icon: Sparkles,
+    color: "text-cyan-500",
+    text: "New campaign launched: HiLux Service Reminder Q2",
+    time: "3h ago",
+  },
+];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -69,16 +159,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="font-semibold text-foreground mb-1">{label}</p>
         {payload.map((p: any) => (
           <div key={p.name} className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: p.color }}
+            />
             <span className="text-muted-foreground">{p.name}:</span>
             <span className="font-medium">{p.value}</span>
           </div>
         ))}
       </div>
-    )
+    );
   }
-  return null
-}
+  return null;
+};
 
 export default function DashboardPage() {
   return (
@@ -91,7 +184,9 @@ export default function DashboardPage() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+            Dashboard
+          </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Sunday 29 June 2026 · Good morning, Alex 👋
           </p>
@@ -99,7 +194,9 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">3 Active Campaigns</span>
+            <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              3 Active Campaigns
+            </span>
           </div>
         </div>
       </motion.div>
@@ -122,24 +219,34 @@ export default function DashboardPage() {
         >
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="font-semibold text-sm text-foreground">Call Performance — June 2026</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Calls made, answered, and booked</p>
+              <h2 className="font-semibold text-sm text-foreground">
+                Call Performance — June 2026
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Calls made, answered, and booked
+              </p>
             </div>
             <div className="flex items-center gap-4 text-[11px]">
               {[
-                { color: '#0C1E3C', label: 'Calls' },
-                { color: '#00B4D8', label: 'Answered' },
-                { color: '#10B981', label: 'Booked' },
-              ].map(l => (
+                { color: "#0C1E3C", label: "Calls" },
+                { color: "#00B4D8", label: "Answered" },
+                { color: "#10B981", label: "Booked" },
+              ].map((l) => (
                 <div key={l.label} className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: l.color }} />
+                  <span
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: l.color }}
+                  />
                   <span className="text-muted-foreground">{l.label}</span>
                 </div>
               ))}
             </div>
           </div>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={mockDailyMetrics} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <AreaChart
+              data={mockDailyMetrics}
+              margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="colorCalls" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#0C1E3C" stopOpacity={0.15} />
@@ -155,12 +262,42 @@ export default function DashboardPage() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" />
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                axisLine={false}
+                tickLine={false}
+              />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="calls" stroke="#0C1E3C" strokeWidth={2} fill="url(#colorCalls)" name="Calls" />
-              <Area type="monotone" dataKey="answered" stroke="#00B4D8" strokeWidth={2} fill="url(#colorAnswered)" name="Answered" />
-              <Area type="monotone" dataKey="booked" stroke="#10B981" strokeWidth={2} fill="url(#colorBooked)" name="Booked" />
+              <Area
+                type="monotone"
+                dataKey="calls"
+                stroke="#0C1E3C"
+                strokeWidth={2}
+                fill="url(#colorCalls)"
+                name="Calls"
+              />
+              <Area
+                type="monotone"
+                dataKey="answered"
+                stroke="#00B4D8"
+                strokeWidth={2}
+                fill="url(#colorAnswered)"
+                name="Answered"
+              />
+              <Area
+                type="monotone"
+                dataKey="booked"
+                stroke="#10B981"
+                strokeWidth={2}
+                fill="url(#colorBooked)"
+                name="Booked"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </motion.div>
@@ -172,8 +309,12 @@ export default function DashboardPage() {
           transition={{ duration: 0.4, delay: 0.35 }}
           className="bg-card rounded-2xl p-5 border border-border card-shadow"
         >
-          <h2 className="font-semibold text-sm text-foreground mb-1">Call Outcomes</h2>
-          <p className="text-xs text-muted-foreground mb-4">This month distribution</p>
+          <h2 className="font-semibold text-sm text-foreground mb-1">
+            Call Outcomes
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            This month distribution
+          </p>
           <div className="flex justify-center">
             <PieChart width={180} height={180}>
               <Pie
@@ -190,17 +331,27 @@ export default function DashboardPage() {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(v) => [v, 'Calls']} />
+              <Tooltip formatter={(v) => [v, "Calls"]} />
             </PieChart>
           </div>
           <div className="space-y-2 mt-2">
             {pieData.map((item) => (
-              <div key={item.name} className="flex items-center justify-between">
+              <div
+                key={item.name}
+                className="flex items-center justify-between"
+              >
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs text-muted-foreground">{item.name}</span>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {item.name}
+                  </span>
                 </div>
-                <span className="text-xs font-semibold text-foreground">{item.value}</span>
+                <span className="text-xs font-semibold text-foreground">
+                  {item.value}
+                </span>
               </div>
             ))}
           </div>
@@ -210,7 +361,7 @@ export default function DashboardPage() {
       {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Recent Campaigns */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
@@ -237,10 +388,10 @@ export default function DashboardPage() {
               </Link>
             ))}
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Activity Feed */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.45 }}
@@ -268,10 +419,10 @@ export default function DashboardPage() {
               )
             })}
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* AI Insights */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.5 }}
@@ -299,8 +450,8 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </div>
-  )
+  );
 }
