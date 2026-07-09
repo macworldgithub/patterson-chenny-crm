@@ -2,7 +2,15 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Bell, Search, Plus, Sun, Moon, ChevronDown } from 'lucide-react'
+import {
+  Bell,
+  Search,
+  Sun,
+  Moon,
+  Menu,
+  X,
+  ChevronDown,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -13,25 +21,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { mockNotifications } from '@/lib/mock-data'
 import { useTheme } from '@/contexts/ThemeContext'
 import { CommandPalette } from '@/components/layout/CommandPalette'
 
-const campaigns = [
-  'Toyota HiLux Service Reminder Q2 2026',
-  'Mercedes GLC Upgrade Offer — June',
-  'Isuzu D-Max Finance Renewal',
-  'RAV4 Hybrid Re-engagement',
-]
+interface TopBarProps {
+  onMenuToggle?: () => void;
+  isSidebarOpen?: boolean;
+}
 
-export function TopBar() {
+export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
   const { theme, toggleTheme } = useTheme()
   const [commandOpen, setCommandOpen] = useState(false)
   const unreadCount = mockNotifications.filter(n => !n.read).length
@@ -39,11 +38,21 @@ export function TopBar() {
   return (
     <>
       <CommandPalette open={commandOpen} setOpen={setCommandOpen} />
-      <header className="sticky top-0 z-20 flex items-center gap-3 h-14 px-6 bg-white/80 dark:bg-[#0F1A2E]/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 py-3 px-4 sm:px-6 sm:h-14 bg-white/80 dark:bg-[#0F1A2E]/80 backdrop-blur-md border-b border-border">
+        {/* Hamburger menu button - show on max-lg */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onMenuToggle}
+          className="lg:hidden shrink-0"
+        >
+          {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </Button>
+
         {/* Search trigger */}
         <button
           onClick={() => setCommandOpen(true)}
-          className="flex items-center gap-2 h-9 px-3 rounded-xl bg-muted text-muted-foreground text-sm hover:bg-muted/80 transition-colors flex-1 max-w-xs border border-border"
+          className="flex min-w-0 w-full items-center gap-2 h-9 px-3 rounded-xl bg-muted text-muted-foreground text-sm hover:bg-muted/80 transition-colors flex-1 sm:max-w-xs border border-border"
         >
           <Search className="w-4 h-4 shrink-0" />
           <span className="flex-1 text-left">Search anything...</span>

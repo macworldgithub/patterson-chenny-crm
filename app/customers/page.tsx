@@ -259,18 +259,18 @@ export default function CustomersPage() {
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-4 lg:p-6 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">
             Customers
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {customers.length} customers in database
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <input
             type="file"
             accept=".csv"
@@ -307,7 +307,7 @@ export default function CustomersPage() {
 
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 max-w-xs">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search customers, vehicles..."
@@ -319,7 +319,7 @@ export default function CustomersPage() {
             className="pl-9 h-9 rounded-xl text-sm border-border"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {brands.map((b) => (
             <button
               key={b}
@@ -342,8 +342,8 @@ export default function CustomersPage() {
 
       {/* Table */}
       <div className="bg-card rounded-2xl border border-border card-shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto -mx-4 lg:mx-0">
+          <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">
@@ -505,7 +505,7 @@ export default function CustomersPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-border">
           <p className="text-xs text-muted-foreground">
             Showing {Math.min((page - 1) * PAGE_SIZE + 1, filtered.length)}–
             {Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}{" "}

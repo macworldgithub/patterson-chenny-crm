@@ -8,20 +8,12 @@ import {
   LayoutDashboard,
   Megaphone,
   Users,
-  Phone,
   FlaskConical,
-  BarChart3,
-  Bell,
-  Plug,
-  UserCog,
-  ShieldCheck,
-  ScrollText,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -69,19 +61,47 @@ const navItems: NavItem[] = [
   //   section: "admin",
   // },
   // { href: "/settings", label: "Settings", icon: Settings, section: "admin" },
-  ,
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onToggle?: () => void;
+}
+
+export function Sidebar({ isOpen = true }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Auto-collapse on max-lg screens
+  useEffect(() => {
+    const handleResize = () => {
+      const isLgOrSmaller = window.innerWidth < 1024;
+      setIsMobile(isLgOrSmaller);
+      if (isLgOrSmaller) {
+        setCollapsed(true);
+      } else {
+        setCollapsed(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <TooltipProvider>
       <motion.aside
-        animate={{ width: collapsed ? 72 : 240 }}
+        animate={{
+          width: collapsed ? 72 : 240,
+          x: isMobile ? (isOpen ? 0 : -240) : 0,
+        }}
         transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-        className="relative flex flex-col h-screen bg-[#0C1E3C] border-r border-white/8 shrink-0 overflow-hidden z-30"
+        className={cn(
+          "relative flex flex-col h-screen bg-[#0C1E3C] border-r border-white/8 shrink-0 overflow-hidden z-30",
+          isMobile && "fixed left-0 top-0",
+        )}
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-white/8">
@@ -149,22 +169,24 @@ export function Sidebar() {
             ))}
         </nav>
 
-        {/* Collapse toggle */}
-        <div className="px-2 py-3 border-t border-white/8">
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="flex items-center justify-center w-full h-8 rounded-lg text-slate-400 hover:text-white hover:bg-white/8 transition-colors"
-          >
-            {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <div className="flex items-center gap-2 w-full px-2">
-                <ChevronLeft className="w-4 h-4 shrink-0" />
-                <span className="text-xs">Collapse</span>
-              </div>
-            )}
-          </button>
-        </div>
+        {/* Collapse toggle - hide on mobile */}
+        {!isMobile && (
+          <div className="px-2 py-3 border-t border-white/8">
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="flex items-center justify-center w-full h-8 rounded-lg text-slate-400 hover:text-white hover:bg-white/8 transition-colors"
+            >
+              {collapsed ? (
+                <ChevronRight className="w-4 h-4" />
+              ) : (
+                <div className="flex items-center gap-2 w-full px-2">
+                  <ChevronLeft className="w-4 h-4 shrink-0" />
+                  <span className="text-xs">Collapse</span>
+                </div>
+              )}
+            </button>
+          </div>
+        )}
       </motion.aside>
     </TooltipProvider>
   );

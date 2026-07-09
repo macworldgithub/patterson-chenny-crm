@@ -26,15 +26,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
-import { mockCampaigns, mockCalls, mockDailyMetrics } from "@/lib/mock-data";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { mockDailyMetrics } from '@/lib/mock-data'
 
 const kpiCards = [
   {
@@ -157,7 +153,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-card border border-border rounded-xl p-3 shadow-lg text-xs">
         <p className="font-semibold text-foreground mb-1">{label}</p>
-        {payload.map((p: any) => (
+        {payload.map((p) => (
           <div key={p.name} className="flex items-center gap-2">
             <span
               className="w-2 h-2 rounded-full"
@@ -175,23 +171,23 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function DashboardPage() {
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-4 lg:p-6 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex items-center justify-between"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">
             Dashboard
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Sunday 29 June 2026 · Good morning, Alex 👋
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
@@ -202,7 +198,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {kpiCards.map((card, i) => (
           <StatCard key={card.title} {...card} index={i} />
         ))}
@@ -215,9 +211,9 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="lg:col-span-2 bg-card rounded-2xl p-5 border border-border card-shadow"
+          className="lg:col-span-2 bg-card rounded-2xl p-4 lg:p-5 border border-border card-shadow"
         >
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
             <div>
               <h2 className="font-semibold text-sm text-foreground">
                 Call Performance — June 2026

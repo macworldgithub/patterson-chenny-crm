@@ -161,7 +161,8 @@ export default function SimulationPage() {
 
   const voiceAgent = useVoiceAgent({
     serverUrl:
-      process.env.NEXT_PUBLIC_VOICE_AGENT_URL || "https://patterson-voice.omnisuiteai.com",
+      process.env.NEXT_PUBLIC_VOICE_AGENT_URL ||
+      "https://patterson-voice.omnisuiteai.com",
     carContext: selectedCustomer?.vehicle,
   });
 
@@ -323,18 +324,18 @@ export default function SimulationPage() {
   }, [voiceAgent.agentTranscript]);
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-4 lg:p-6 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">
             Voice Agent Simulation
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Test AI voice agent with real-time audio
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-xl">
             {voiceAgent.isConnected ? (
               <CheckCircle className="w-4 h-4 text-green-500" />
@@ -345,10 +346,10 @@ export default function SimulationPage() {
               {voiceAgent.isConnected ? "Connected" : "Disconnected"}
             </span>
           </div>
-          <Button variant="outline" className="rounded-xl gap-2">
+          <Button variant="outline" className="rounded-xl gap-2 hidden sm:flex">
             <BookOpen className="w-4 h-4" /> Training Guide
           </Button>
-          <Button variant="outline" className="rounded-xl gap-2">
+          <Button variant="outline" className="rounded-xl gap-2 hidden sm:flex">
             <Settings className="w-4 h-4" /> Settings
           </Button>
         </div>
@@ -356,7 +357,7 @@ export default function SimulationPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Panel - Configuration */}
-        <div className="space-y-4">
+        <div className="space-y-4 order-2 lg:order-1">
           <div className="bg-card rounded-2xl border border-border card-shadow p-5">
             <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
               <User className="w-4 h-4" /> Select Customer
@@ -368,10 +369,10 @@ export default function SimulationPage() {
                 setSelectedCustomer(customer || null);
               }}
             >
-              <SelectTrigger className="rounded-xl">
+              <SelectTrigger className="w-full rounded-xl">
                 <SelectValue placeholder="Choose a customer" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent className="rounded-xl min-w-full">
                 {mockCustomers.map((customer) => (
                   <SelectItem key={customer.name} value={customer.name}>
                     <div className="flex flex-col">
@@ -387,19 +388,21 @@ export default function SimulationPage() {
 
             {selectedCustomer && (
               <div className="mt-4 p-4 bg-muted/30 rounded-xl space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm min-w-0">
                   <span className="text-muted-foreground">Vehicle</span>
-                  <span className="font-medium">
+                  <span className="font-medium text-right truncate min-w-0 ml-4">
                     {selectedCustomer.vehicle}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm min-w-0">
                   <span className="text-muted-foreground">Location</span>
-                  <span className="font-medium">{selectedCustomer.suburb}</span>
+                  <span className="font-medium text-right truncate min-w-0 ml-4">
+                    {selectedCustomer.suburb}
+                  </span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm min-w-0">
                   <span className="text-muted-foreground">Last Service</span>
-                  <span className="font-medium">
+                  <span className="font-medium text-right truncate min-w-0 ml-4">
                     {selectedCustomer.lastService}
                   </span>
                 </div>
@@ -426,10 +429,10 @@ export default function SimulationPage() {
                 setSelectedScenario(value as SimulationScenario)
               }
             >
-              <SelectTrigger className="rounded-xl">
+              <SelectTrigger className="w-full rounded-xl">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent className="rounded-xl min-w-full">
                 {(
                   Object.keys(scenarioDescriptions) as SimulationScenario[]
                 ).map((scenario) => (
@@ -456,10 +459,10 @@ export default function SimulationPage() {
                   Agent Personality
                 </label>
                 <Select defaultValue="professional">
-                  <SelectTrigger className="rounded-xl h-9">
+                  <SelectTrigger className="w-full rounded-xl h-9">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl">
+                  <SelectContent className="rounded-xl min-w-full">
                     <SelectItem value="professional">Professional</SelectItem>
                     <SelectItem value="friendly">Friendly</SelectItem>
                     <SelectItem value="casual">Casual</SelectItem>
@@ -471,10 +474,10 @@ export default function SimulationPage() {
                   Response Speed
                 </label>
                 <Select defaultValue="normal">
-                  <SelectTrigger className="rounded-xl h-9">
+                  <SelectTrigger className="w-full rounded-xl h-9">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl">
+                  <SelectContent className="rounded-xl min-w-full">
                     <SelectItem value="fast">Fast</SelectItem>
                     <SelectItem value="normal">Normal</SelectItem>
                     <SelectItem value="slow">Slow</SelectItem>
@@ -486,10 +489,10 @@ export default function SimulationPage() {
         </div>
 
         {/* Center Panel - Conversation */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4 order-1 lg:order-2">
           {/* Call Controls */}
-          <div className="bg-card rounded-2xl border border-border card-shadow p-5">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-card rounded-2xl border border-border card-shadow p-4 lg:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
               <div className="flex items-center gap-3">
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center ${isRunning ? "bg-green-500 animate-pulse" : "bg-muted"}`}
@@ -509,10 +512,10 @@ export default function SimulationPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {!isRunning ? (
                   <Button
-                    className="bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl gap-2"
+                    className="bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl gap-2 w-full sm:w-auto"
                     onClick={handleStartSimulation}
                     disabled={!selectedCustomer || !voiceAgent.isConnected}
                   >
@@ -569,7 +572,7 @@ export default function SimulationPage() {
 
             {/* Real-time Metrics */}
             {isRunning && (
-              <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-border">
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground mb-1">
                     Sentiment
@@ -624,11 +627,11 @@ export default function SimulationPage() {
           </div>
 
           {/* Conversation Feed */}
-          <div className="bg-card rounded-2xl border border-border card-shadow p-5">
+          <div className="bg-card rounded-2xl border border-border card-shadow p-4 lg:p-5">
             <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
               <MessageSquare className="w-4 h-4" /> Live Transcript
             </h3>
-            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+            <div className="space-y-3 max-h-[300px] lg:max-h-[400px] overflow-y-auto">
               <AnimatePresence>
                 {messages.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
@@ -702,11 +705,11 @@ export default function SimulationPage() {
 
           {/* Call Log Display */}
           {voiceAgent.callLog && (
-            <div className="bg-card rounded-2xl border border-border card-shadow p-5">
+            <div className="bg-card rounded-2xl border border-border card-shadow p-4 lg:p-5">
               <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" /> Call Log
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-3 bg-muted/30 rounded-xl">
                   <p className="text-xs text-muted-foreground mb-1">
                     Caller Name

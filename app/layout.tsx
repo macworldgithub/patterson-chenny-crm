@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
-import { Sidebar } from '@/components/layout/Sidebar'
-import { TopBar } from '@/components/layout/TopBar'
+import { LayoutWrapper } from '@/components/layout/LayoutWrapper'
 import { Toaster } from '@/components/ui/sonner'
 
 const inter = Inter({
@@ -31,13 +30,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider>
           <div className="flex h-screen overflow-hidden bg-background">
-            <Sidebar />
-            <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-              <TopBar />
-              <main className="flex-1 overflow-y-auto scrollbar-thin">
-                {children}
-              </main>
-            </div>
+            <LayoutWrapper>{children}</LayoutWrapper>
           </div>
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
