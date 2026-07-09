@@ -32,6 +32,17 @@ import {
 } from "recharts";
 import { mockDailyMetrics } from '@/lib/mock-data'
 
+interface TooltipPayload {
+  name: string;
+  value: string | number;
+  color: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayload[];
+  label?: string | number;
+}
 const kpiCards = [
   {
     title: "Today's Calls",
@@ -148,25 +159,40 @@ const recentActivity = [
   },
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-card border border-border rounded-xl p-3 shadow-lg text-xs">
-        <p className="font-semibold text-foreground mb-1">{label}</p>
-        {payload.map((p) => (
-          <div key={p.name} className="flex items-center gap-2">
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: p.color }}
-            />
-            <span className="text-muted-foreground">{p.name}:</span>
-            <span className="font-medium">{p.value}</span>
-          </div>
-        ))}
-      </div>
-    );
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: CustomTooltipProps) => {
+  if (!active || !payload?.length) {
+    return null;
   }
-  return null;
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-3 shadow-lg text-xs">
+      <p className="font-semibold text-foreground mb-1">
+        {String(label)}
+      </p>
+
+      {payload.map((item: TooltipPayload, index: number) => (
+        <div
+          key={`${item.name}-${index}`}
+          className="flex items-center gap-2"
+        >
+          <span
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: item.color }}
+          />
+          <span className="text-muted-foreground">
+            {item.name}:
+          </span>
+          <span className="font-medium">
+            {item.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default function DashboardPage() {
