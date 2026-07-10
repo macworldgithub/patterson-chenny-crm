@@ -1302,7 +1302,7 @@ export default function CampaignsPage() {
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="rounded-xl" align="end">
+                          <DropdownMenuContent className="rounded-xl">
                             <DropdownMenuItem
                               onClick={() => setSelectedCampaign(campaign)}
                             >
