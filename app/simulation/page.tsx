@@ -4069,7 +4069,7 @@ export default function SimulationPage() {
   const [isDownloadingSummary, setIsDownloadingSummary] = useState(false);
 
   const serverUrl =
-    process.env.NEXT_PUBLIC_VOICE_AGENT_URL || "http://localhost:4051"; // Default to localhost if not set
+    process.env.NEXT_PUBLIC_VOICE_AGENT_URL || "https://patterson-voice.omnisuiteai.com"; // Default to localhost if not set
 
   const voiceAgent = useVoiceAgent({
     serverUrl,
