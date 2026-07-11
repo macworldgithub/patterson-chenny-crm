@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
 
+
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   
