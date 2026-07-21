@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { AuthProvider } from '@/contexts/AuthContext'
 import { LayoutWrapper } from '@/components/layout/LayoutWrapper'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -29,12 +30,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider>
-          <div className="flex h-screen overflow-hidden bg-background">
+          <AuthProvider>
             <LayoutWrapper>{children}</LayoutWrapper>
-          </div>
-          <Toaster richColors position="bottom-right" />
+            <Toaster richColors position="bottom-right" />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
   )
 }
+
+

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { mockNotifications } from "@/lib/mock-data";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 
 interface TopBarProps {
@@ -24,8 +25,10 @@ interface TopBarProps {
 
 export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const [commandOpen, setCommandOpen] = useState(false);
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
+
 
   return (
     <>
@@ -152,20 +155,22 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
           {/* Profile */}
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 h-9 pl-1 pr-2 rounded-xl border border-border bg-background hover:bg-muted transition-colors">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#0C1E3C] to-[#00B4D8] flex items-center justify-center text-white text-xs font-bold">
-                AH
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#0C1E3C] to-[#00B4D8] flex items-center justify-center text-white text-xs font-bold uppercase">
+                {user ? `${user.firstName[0] || ''}${user.lastName[0] || ''}` : 'G'}
               </div>
               <span className="text-xs font-medium hidden sm:block">
-                Alex Harrison
+                {user ? `${user.firstName} ${user.lastName}` : 'Guest User'}
               </span>
               <ChevronDown className="w-3 h-3 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-52 rounded-2xl p-2">
               <DropdownMenuLabel className="px-2 py-1.5">
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-semibold text-sm">Alex Harrison</span>
-                  <span className="text-xs text-muted-foreground">
-                    Super Admin · Group HQ
+                  <span className="font-semibold text-sm truncate">
+                    {user ? `${user.firstName} ${user.lastName}` : 'Guest User'}
+                  </span>
+                  <span className="text-xs text-muted-foreground capitalize truncate">
+                    {user ? user.role.replace('_', ' ') : 'Guest'} · {user ? user.dealership : 'Dealer'}
                   </span>
                 </div>
               </DropdownMenuLabel>
@@ -177,7 +182,10 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
                 Preferences
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="rounded-lg text-xs text-destructive">
+              <DropdownMenuItem 
+                className="rounded-lg text-xs text-destructive cursor-pointer"
+                onClick={logout}
+              >
                 Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -187,3 +195,4 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
     </>
   );
 }
+

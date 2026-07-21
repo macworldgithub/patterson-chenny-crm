@@ -3960,7 +3960,7 @@ function SimulationCsvAndBookings({
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <input
+              <input 
                 type="date"
                 className="w-full h-8 rounded-lg border border-border bg-background px-2 text-xs"
                 value={bookingDraft.date}
