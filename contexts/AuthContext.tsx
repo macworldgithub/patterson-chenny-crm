@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
-      const response = await apiClient<{ token?: string; accessToken?: string; user?: User }>('api/auth/login', {
+      const response = await apiClient<{ token?: string; accessToken?: string; user?: User }>('/auth/login', {
         method: 'POST',
         body: { email, password },
         skipAuth: true,
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (data: any) => {
     setIsLoading(true)
     try {
-      await apiClient<User>('api/users', {
+      await apiClient<User>('/users', {
         method: 'POST',
         body: data,
         skipAuth: true,
