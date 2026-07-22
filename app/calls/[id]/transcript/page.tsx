@@ -1,13 +1,14 @@
 'use client'
 
-import { use, useState } from 'react'
+import { use, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronLeft, Search, User, Bot, Clock, Download, Sparkles } from 'lucide-react'
+import { ChevronLeft, Search, User, Bot, Clock, Download, Sparkles, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { StatusPill } from '@/components/ui/status-pill'
 import { Badge } from '@/components/ui/badge'
-import { mockCalls } from '@/lib/mock-data'
+import { fetchCallById } from '@/lib/calls-api'
+import type { Call } from '@/types'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -19,10 +20,41 @@ function formatTimestamp(seconds: number): string {
 
 export default function TranscriptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const call = mockCalls.find(c => c.id === id) ?? mockCalls[0]
+  const [call, setCall] = useState<Call | null>(null)
   const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
 
-  const filtered = call.transcript.filter(seg =>
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await fetchCallById(id)
+        setCall(data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!call) {
+    return (
+      <div className="p-6 text-center text-muted-foreground">
+        Call not found.
+      </div>
+    )
+  }
+
+  const filtered = (call.transcript || []).filter(seg =>
     seg.text.toLowerCase().includes(search.toLowerCase())
   )
 
@@ -133,25 +165,25 @@ export default function TranscriptPage({ params }: { params: Promise<{ id: strin
           <div className="bg-card rounded-2xl border border-border p-4">
             <h3 className="font-semibold text-sm text-foreground mb-3">Key Extractions</h3>
             <div className="space-y-2.5">
-              {call.keyExtractions.bookingDate && (
+              {call.keyExtractions?.bookingDate && (
                 <div className="flex justify-between py-1 border-b border-border">
                   <span className="text-xs text-muted-foreground">Booking Date</span>
                   <span className="text-xs font-semibold text-emerald-600">{call.keyExtractions.bookingDate}</span>
                 </div>
               )}
-              {call.keyExtractions.bookingTime && (
+              {call.keyExtractions?.bookingTime && (
                 <div className="flex justify-between py-1 border-b border-border">
                   <span className="text-xs text-muted-foreground">Booking Time</span>
                   <span className="text-xs font-semibold text-emerald-600">{call.keyExtractions.bookingTime}</span>
                 </div>
               )}
-              {call.keyExtractions.vehicleInterest && (
+              {call.keyExtractions?.vehicleInterest && (
                 <div className="flex justify-between py-1 border-b border-border">
                   <span className="text-xs text-muted-foreground">Vehicle Interest</span>
                   <span className="text-xs font-medium text-foreground text-right max-w-[150px]">{call.keyExtractions.vehicleInterest}</span>
                 </div>
               )}
-              {call.keyExtractions.dealValue && call.keyExtractions.dealValue > 0 && (
+              {call.keyExtractions?.dealValue && call.keyExtractions.dealValue > 0 && (
                 <div className="flex justify-between py-1 border-b border-border">
                   <span className="text-xs text-muted-foreground">Deal Value</span>
                   <span className="text-xs font-semibold text-cyan-600">${call.keyExtractions.dealValue?.toLocaleString()}</span>
@@ -165,11 +197,11 @@ export default function TranscriptPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {/* Objections & Next Steps */}
-          {(call.keyExtractions.objections?.length ?? 0) > 0 && (
+          {call.keyExtractions?.objections && call.keyExtractions.objections.length > 0 && (
             <div className="bg-card rounded-2xl border border-border p-4">
               <h3 className="font-semibold text-sm text-foreground mb-3">Objections</h3>
               <ul className="space-y-1.5">
-                {call.keyExtractions.objections?.map((obj, i) => (
+                {call.keyExtractions.objections.map((obj, i) => (
                   <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
                     {obj}
@@ -179,11 +211,11 @@ export default function TranscriptPage({ params }: { params: Promise<{ id: strin
             </div>
           )}
 
-          {(call.keyExtractions.nextSteps?.length ?? 0) > 0 && (
+          {call.keyExtractions?.nextSteps && call.keyExtractions.nextSteps.length > 0 && (
             <div className="bg-card rounded-2xl border border-border p-4">
               <h3 className="font-semibold text-sm text-foreground mb-3">Next Steps</h3>
               <ul className="space-y-1.5">
-                {call.keyExtractions.nextSteps?.map((step, i) => (
+                {call.keyExtractions.nextSteps.map((step, i) => (
                   <li key={i} className="text-xs text-foreground flex items-start gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-1.5 shrink-0" />
                     {step}

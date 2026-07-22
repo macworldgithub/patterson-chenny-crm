@@ -977,8 +977,13 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { mockCampaigns } from "@/lib/mock-data";
-import { getCampaigns, setCampaigns as saveCampaigns, updateCampaign, deleteCampaign, initializeStorage } from "@/lib/storage";
+import {
+  fetchCampaigns,
+  createCampaign,
+  updateCampaign,
+  deleteCampaign,
+  updateCampaignStatus,
+} from "@/lib/campaigns-api";
 import type { Campaign } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -1000,18 +1005,36 @@ export default function CampaignsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [formData, setFormData] = useState<Partial<Campaign>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Load campaigns from localStorage on mount
+  const loadCampaigns = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await fetchCampaigns();
+      setCampaignsState(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load campaigns");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    initializeStorage();
-    setCampaignsState(getCampaigns());
+    loadCampaigns();
   }, []);
 
-  // Sync state changes to localStorage
-  const setCampaigns = (newCampaigns: Campaign[]) => {
-    setCampaignsState(newCampaigns);
-    saveCampaigns(newCampaigns);
-  };
+  // Keep selected campaign details in sync
+  useEffect(() => {
+    if (selectedCampaign) {
+      const updated = campaigns.find(c => c.id === selectedCampaign.id);
+      if (updated && updated.status !== selectedCampaign.status) {
+        setSelectedCampaign(updated);
+      }
+    }
+  }, [campaigns, selectedCampaign]);
 
   const handleExport = () => {
     const csvContent =
@@ -1031,49 +1054,60 @@ export default function CampaignsPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleDelete = (id: string) => {
-    deleteCampaign(id);
-    setCampaignsState(getCampaigns());
-    if (selectedCampaign?.id === id) setSelectedCampaign(null);
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this campaign?")) {
+      try {
+        await deleteCampaign(id);
+        if (selectedCampaign?.id === id) setSelectedCampaign(null);
+        await loadCampaigns();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete campaign");
+      }
+    }
   };
 
-  const handleSaveCampaign = () => {
-    if (editingCampaign) {
-      updateCampaign(editingCampaign.id, formData);
-      setCampaignsState(getCampaigns());
-    } else {
-      const newCampaign: Campaign = {
-        id: `camp-${Date.now()}`,
-        name: formData.name || "New Campaign",
-        type: (formData.type as any) || "service_reminder",
-        status: (formData.status as any) || "draft",
-        brand: formData.brand || "Toyota",
-        location: formData.location || "HQ",
-        totalContacts: 0,
-        contactsAttempted: 0,
-        contactsReached: 0,
-        bookings: 0,
-        conversions: 0,
-        conversionRate: 0,
-        answerRate: 0,
-        startDate: formData.startDate || new Date().toISOString().split("T")[0],
-        endDate: formData.endDate || new Date().toISOString().split("T")[0],
-        scheduledTime: formData.scheduledTime || "09:00 AM - 05:00 PM",
-        maxAttempts: 3,
-        attemptsCompleted: 0,
-        revenueImpact: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        aiAgentName: "Aria",
-        script: "",
-        tags: [],
-      };
-      const current = getCampaigns();
-      setCampaigns([newCampaign, ...current]);
+  const handleSaveCampaign = async () => {
+    try {
+      setIsSaving(true);
+      if (editingCampaign) {
+        await updateCampaign(editingCampaign.id, formData);
+      } else {
+        const newCampaign = {
+          name: formData.name || "New Campaign",
+          type: (formData.type as any) || "service_reminder",
+          status: (formData.status as any) || "draft",
+          brand: formData.brand || "Toyota",
+          location: formData.location || "HQ",
+          totalContacts: 0,
+          contactsAttempted: 0,
+          contactsReached: 0,
+          bookings: 0,
+          conversions: 0,
+          conversionRate: 0,
+          answerRate: 0,
+          startDate: formData.startDate || new Date().toISOString().split("T")[0],
+          endDate: formData.endDate || new Date().toISOString().split("T")[0],
+          scheduledTime: formData.scheduledTime || "09:00 AM - 05:00 PM",
+          maxAttempts: 3,
+          attemptsCompleted: 0,
+          revenueImpact: 0,
+          aiAgentName: formData.aiAgentName || "Aria",
+          script: "",
+          tags: [],
+        };
+        await createCampaign(newCampaign);
+      }
+      setIsFormOpen(false);
+      setEditingCampaign(null);
+      setFormData({});
+      await loadCampaigns();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save campaign");
+    } finally {
+      setIsSaving(false);
     }
-    setIsFormOpen(false);
-    setEditingCampaign(null);
-    setFormData({});
   };
 
   const openEditForm = (campaign: Campaign) => {
@@ -1193,7 +1227,29 @@ export default function CampaignsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map((campaign, i) => {
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#0C1E3C] border-t-transparent rounded-full animate-spin" />
+                      Loading campaigns...
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-red-500">
+                    {error}
+                    <Button variant="link" onClick={loadCampaigns} className="ml-2 text-[#0C1E3C] p-0">Retry</Button>
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                    No campaigns found.
+                  </td>
+                </tr>
+              ) : filtered.map((campaign, i) => {
                 const progress =
                   campaign.totalContacts > 0
                     ? (campaign.contactsAttempted / campaign.totalContacts) *
@@ -1476,8 +1532,32 @@ export default function CampaignsPage() {
                   <Button
                     variant="outline"
                     className="rounded-xl gap-2 text-sm"
+                    onClick={async () => {
+                      try {
+                        await updateCampaignStatus(selectedCampaign.id, "paused");
+                        await loadCampaigns();
+                      } catch (err) {
+                        alert("Failed to pause campaign");
+                      }
+                    }}
                   >
                     <Pause className="w-3.5 h-3.5" /> Pause
+                  </Button>
+                )}
+                {selectedCampaign.status === "paused" && (
+                  <Button
+                    variant="outline"
+                    className="rounded-xl gap-2 text-sm"
+                    onClick={async () => {
+                      try {
+                        await updateCampaignStatus(selectedCampaign.id, "active");
+                        await loadCampaigns();
+                      } catch (err) {
+                        alert("Failed to resume campaign");
+                      }
+                    }}
+                  >
+                    <Play className="w-3.5 h-3.5" /> Resume
                   </Button>
                 )}
               </div>
@@ -1598,7 +1678,11 @@ export default function CampaignsPage() {
               <Button
                 className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white"
                 onClick={handleSaveCampaign}
+                disabled={isSaving}
               >
+                {isSaving ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block align-middle" />
+                ) : null}
                 {editingCampaign ? "Save Changes" : "Create Campaign"}
               </Button>
             </div>
