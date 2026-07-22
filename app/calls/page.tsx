@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Search, Filter, Download, Phone, Clock, ChevronRight,
-  PhoneCall, PhoneMissed, Voicemail, Mic, MoreHorizontal,
+  PhoneCall, PhoneMissed, Voicemail, Mic, MoreHorizontal, Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { mockCalls } from '@/lib/mock-data'
+import { fetchCalls, fetchCallStats } from '@/lib/calls-api'
+import type { Call } from '@/types'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -45,16 +46,32 @@ function ConfidenceBar({ score }: { score: number }) {
 export default function CallsPage() {
   const [search, setSearch] = useState('')
   const [outcomeFilter, setOutcomeFilter] = useState('all')
+  const [calls, setCalls] = useState<Call[]>([])
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<any>({ total: 0, booked: 0, noAnswer: 0, avgDuration: 0 })
 
   const outcomes = ['all', 'booked', 'callback_requested', 'not_interested', 'no_answer', 'voicemail']
 
-  const filtered = mockCalls.filter(c => {
-    const matchSearch =
-      c.customerName.toLowerCase().includes(search.toLowerCase()) ||
-      c.campaignName.toLowerCase().includes(search.toLowerCase())
-    const matchOutcome = outcomeFilter === 'all' || c.outcome === outcomeFilter
-    return matchSearch && matchOutcome
-  })
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      try {
+        const [callsRes, statsRes] = await Promise.all([
+          fetchCalls({ search, outcome: outcomeFilter }),
+          fetchCallStats()
+        ])
+        setCalls(callsRes.data)
+        setStats(statsRes)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    const timer = setTimeout(load, 300)
+    return () => clearTimeout(timer)
+  }, [search, outcomeFilter])
 
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
@@ -62,7 +79,7 @@ export default function CallsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Calls</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{mockCalls.length} calls recorded</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{stats.total} calls recorded</p>
         </div>
         <Button variant="outline" className="rounded-xl gap-2 h-10">
           <Download className="w-4 h-4" /> Export CSV
@@ -72,10 +89,10 @@ export default function CallsPage() {
       {/* Summary stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Total Calls', value: mockCalls.length, color: 'text-foreground' },
-          { label: 'Booked', value: mockCalls.filter(c => c.outcome === 'booked').length, color: 'text-emerald-600' },
-          { label: 'No Answer', value: mockCalls.filter(c => c.outcome === 'no_answer').length, color: 'text-amber-600' },
-          { label: 'Avg Duration', value: '68s', color: 'text-cyan-600' },
+          { label: 'Total Calls', value: stats.total, color: 'text-foreground' },
+          { label: 'Booked', value: stats.booked, color: 'text-emerald-600' },
+          { label: 'No Answer', value: stats.noAnswer, color: 'text-amber-600' },
+          { label: 'Avg Duration', value: formatDuration(stats.avgDuration), color: 'text-cyan-600' },
         ].map(s => (
           <div key={s.label} className="bg-card rounded-2xl border border-border p-4 card-shadow">
             <p className="text-xs text-muted-foreground">{s.label}</p>
@@ -129,7 +146,21 @@ export default function CallsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {filtered.map((call, i) => (
+            {loading ? (
+              <tr>
+                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading calls...
+                  </div>
+                </td>
+              </tr>
+            ) : calls.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                  No calls found
+                </td>
+              </tr>
+            ) : calls.map((call, i) => (
               <motion.tr
                 key={call.id}
                 initial={{ opacity: 0, y: 4 }}

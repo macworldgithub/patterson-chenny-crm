@@ -30,7 +30,12 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { mockDailyMetrics } from '@/lib/mock-data'
+import { fetchDashboardStats, fetchDailyMetrics } from '@/lib/analytics-api'
+import { fetchCallStats } from '@/lib/calls-api'
+import { fetchAuditLogs } from '@/lib/audit-api'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 interface TooltipPayload {
   name: string;
@@ -43,60 +48,6 @@ interface CustomTooltipProps {
   payload?: TooltipPayload[];
   label?: string | number;
 }
-const kpiCards = [
-  {
-    title: "Today's Calls",
-    value: 94,
-    change: 12.4,
-    changeType: "increase" as const,
-    icon: Phone,
-    color: "navy" as const,
-    changePeriod: "vs yesterday",
-  },
-  {
-    title: "Answer Rate",
-    value: "70.2%",
-    change: 2.1,
-    changeType: "increase" as const,
-    icon: PhoneCall,
-    color: "cyan" as const,
-    changePeriod: "vs last week",
-  },
-  {
-    title: "Bookings Today",
-    value: 14,
-    change: 7.7,
-    changeType: "increase" as const,
-    icon: Calendar,
-    color: "green" as const,
-    changePeriod: "vs yesterday",
-  },
-  {
-    title: "Conversion Rate",
-    value: "16.7%",
-    change: 1.2,
-    changeType: "increase" as const,
-    icon: Percent,
-    color: "purple" as const,
-    changePeriod: "vs last week",
-  },
-  {
-    title: "Upgrade Leads",
-    value: 28,
-    change: 4.2,
-    changeType: "increase" as const,
-    icon: UserPlus,
-    color: "amber" as const,
-    changePeriod: "active pipeline",
-  },
-];
-
-const pieData = [
-  { name: "Booked", value: 134, color: "#10B981" },
-  { name: "Callback", value: 89, color: "#8B5CF6" },
-  { name: "Not Interested", value: 210, color: "#6B7280" },
-  { name: "No Answer", value: 179, color: "#F59E0B" },
-];
 
 const aiInsights = [
   {
@@ -117,45 +68,6 @@ const aiInsights = [
     body: "Isuzu D-Max Finance Renewal campaign has dropped below 50% answer rate. Review call scheduling and contact list quality.",
     tag: "Warning",
     tagColor: "text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400",
-  },
-];
-
-const recentActivity = [
-  {
-    icon: CheckCircle2,
-    color: "text-emerald-500",
-    text: "James Nguyen booked a service — HiLux SR5",
-    time: "2 min ago",
-  },
-  {
-    icon: CheckCircle2,
-    color: "text-emerald-500",
-    text: "Lisa Moran booked a service — RAV4 Hybrid",
-    time: "28 min ago",
-  },
-  {
-    icon: Phone,
-    color: "text-blue-500",
-    text: "Sarah Thompson — callback scheduled for 25 Jun",
-    time: "45 min ago",
-  },
-  {
-    icon: XCircle,
-    color: "text-slate-400",
-    text: "Michael Patel — not interested, follow up Aug",
-    time: "1h ago",
-  },
-  {
-    icon: PhoneMissed,
-    color: "text-amber-500",
-    text: "Emma Chen — no answer, retry attempt 2",
-    time: "2h ago",
-  },
-  {
-    icon: Sparkles,
-    color: "text-cyan-500",
-    text: "New campaign launched: HiLux Service Reminder Q2",
-    time: "3h ago",
   },
 ];
 
@@ -196,6 +108,104 @@ const CustomTooltip = ({
 };
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<any>(null);
+  const [callStats, setCallStats] = useState<any>(null);
+  const [dailyMetrics, setDailyMetrics] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [statsData, callStatsData, dailyData, auditData] = await Promise.all([
+          fetchDashboardStats(),
+          fetchCallStats(),
+          fetchDailyMetrics(30),
+          fetchAuditLogs({ limit: 6 })
+        ]);
+        setStats(statsData);
+        setCallStats(callStatsData);
+        setDailyMetrics(dailyData);
+        setAuditLogs(auditData.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  if (loading || !stats || !callStats) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[500px]">
+        <div className="animate-spin w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  const kpiCards = [
+    {
+      title: "Total Calls",
+      value: stats.totalCalls,
+      change: 0,
+      changeType: "neutral" as const,
+      icon: Phone,
+      color: "navy" as const,
+      changePeriod: "total",
+    },
+    {
+      title: "Answer Rate",
+      value: `${stats.answerRate}%`,
+      change: 0,
+      changeType: "neutral" as const,
+      icon: PhoneCall,
+      color: "cyan" as const,
+      changePeriod: "overall",
+    },
+    {
+      title: "Bookings",
+      value: stats.bookedCalls,
+      change: 0,
+      changeType: "neutral" as const,
+      icon: Calendar,
+      color: "green" as const,
+      changePeriod: "total",
+    },
+    {
+      title: "Conversion Rate",
+      value: `${stats.conversionRate}%`,
+      change: 0,
+      changeType: "neutral" as const,
+      icon: Percent,
+      color: "purple" as const,
+      changePeriod: "overall",
+    },
+    {
+      title: "Active Campaigns",
+      value: stats.activeCampaigns,
+      change: 0,
+      changeType: "neutral" as const,
+      icon: UserPlus,
+      color: "amber" as const,
+      changePeriod: "currently active",
+    },
+  ];
+
+  const pieData = [
+    { name: "Booked", value: callStats.booked, color: "#10B981" },
+    { name: "No Answer", value: callStats.noAnswer, color: "#F59E0B" },
+    { name: "Voicemail", value: callStats.voicemail, color: "#8B5CF6" },
+    { name: "Other", value: Math.max(0, callStats.total - (callStats.booked + callStats.noAnswer + callStats.voicemail)), color: "#6B7280" },
+  ];
+
+  const recentActivity = auditLogs.map((log: any) => ({
+    icon: CheckCircle2,
+    color: "text-emerald-500",
+    text: `${log.userName} ${log.action} ${log.resourceName || log.resource}`,
+    time: new Date(log.timestamp).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
+  }));
+
   return (
     <div className="p-4 lg:p-6 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
@@ -217,14 +227,14 @@ export default function DashboardPage() {
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              3 Active Campaigns
+              {stats.activeCampaigns} Active Campaigns
             </span>
           </div>
         </div>
       </motion.div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {kpiCards.map((card, i) => (
           <StatCard key={card.title} {...card} index={i} />
         ))}
@@ -242,7 +252,7 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
             <div>
               <h2 className="font-semibold text-sm text-foreground">
-                Call Performance — June 2026
+                Call Performance — Last 30 Days
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Calls made, answered, and booked
@@ -266,7 +276,7 @@ export default function DashboardPage() {
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart
-              data={mockDailyMetrics}
+              data={dailyMetrics}
               margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
             >
               <defs>
@@ -335,7 +345,7 @@ export default function DashboardPage() {
             Call Outcomes
           </h2>
           <p className="text-xs text-muted-foreground mb-4">
-            This month distribution
+            Total distribution
           </p>
           <div className="flex justify-center">
             <PieChart width={180} height={180}>
@@ -381,39 +391,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Recent Campaigns */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-          className="lg:col-span-1 bg-card rounded-2xl border border-border card-shadow overflow-hidden"
-        >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-sm text-foreground">Recent Campaigns</h2>
-            <Link href="/campaigns" className="text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1 hover:underline">
-              View all <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
-          <div className="divide-y divide-border">
-            {mockCampaigns.slice(0, 4).map((campaign) => (
-              <Link
-                key={campaign.id}
-                href={`/campaigns`}
-                className="flex items-center gap-3 px-5 py-3 hover:bg-muted/40 transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">{campaign.name}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{campaign.brand} · {campaign.location}</p>
-                </div>
-                <StatusPill status={campaign.status} />
-              </Link>
-            ))}
-          </div>
-        </motion.div> */}
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Activity Feed */}
-        {/* <motion.div
+        <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.45 }}
@@ -426,7 +406,7 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="divide-y divide-border">
-            {recentActivity.map((item, i) => {
+            {recentActivity.map((item: any, i: number) => {
               const Icon = item.icon
               return (
                 <div key={i} className="flex items-start gap-3 px-5 py-3">
@@ -441,10 +421,10 @@ export default function DashboardPage() {
               )
             })}
           </div>
-        </motion.div> */}
+        </motion.div>
 
         {/* AI Insights */}
-        {/* <motion.div
+        <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.5 }}
@@ -472,7 +452,7 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-        </motion.div> */}
+        </motion.div>
       </div>
     </div>
   );
