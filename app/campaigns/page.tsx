@@ -1,967 +1,22 @@
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import { motion, AnimatePresence } from "framer-motion";
-// import {
-//   Plus,
-//   Search,
-//   Filter,
-//   Download,
-//   MoreHorizontal,
-//   ChevronRight,
-//   Users,
-//   Phone,
-//   Calendar,
-//   TrendingUp,
-//   Play,
-//   Pause,
-//   CheckCircle2,
-//   Clock,
-//   X,
-//   Trash2,
-//   Edit2,
-// } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { StatusPill } from "@/components/ui/status-pill";
-// import { Badge } from "@/components/ui/badge";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-//   DropdownMenuSeparator,
-// } from "@/components/ui/dropdown-menu";
-// import {
-//   Sheet,
-//   SheetContent,
-//   SheetHeader,
-//   SheetTitle,
-//   SheetDescription,
-// } from "@/components/ui/sheet";
-// import { Progress } from "@/components/ui/progress";
-// import { mockCampaigns } from "@/lib/mock-data";
-// import { getCampaigns, setCampaigns as saveCampaigns, updateCampaign, deleteCampaign, initializeStorage } from "@/lib/storage";
-// import type { Campaign } from "@/types";
-// import { cn } from "@/lib/utils";
-
-// const typeLabels: Record<string, string> = {
-//   service_reminder: "Service Reminder",
-//   upgrade_offer: "Upgrade Offer",
-//   reengagement: "Re-engagement",
-//   finance_renewal: "Finance Renewal",
-//   parts_upsell: "Parts Upsell",
-// };
-
-// export default function CampaignsPage() {
-//   const [campaigns, setCampaignsState] = useState<Campaign[]>([]);
-//   const [search, setSearch] = useState("");
-//   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
-//     null,
-//   );
-//   const [statusFilter, setStatusFilter] = useState<string>("all");
-
-//   const [isFormOpen, setIsFormOpen] = useState(false);
-//   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
-//   const [formData, setFormData] = useState<Partial<Campaign>>({});
-
-//   // Load campaigns from localStorage on mount
-//   useEffect(() => {
-//     initializeStorage();
-//     setCampaignsState(getCampaigns());
-//   }, []);
-
-//   // Sync state changes to localStorage
-//   const setCampaigns = (newCampaigns: Campaign[]) => {
-//     setCampaignsState(newCampaigns);
-//     saveCampaigns(newCampaigns);
-//   };
-
-//   const handleExport = () => {
-//     const csvContent =
-//       "id,name,type,status,brand,location,totalContacts,bookings,conversions\n" +
-//       campaigns
-//         .map(
-//           (c) =>
-//             `"${c.id}","${c.name}","${c.type}","${c.status}","${c.brand}","${c.location}",${c.totalContacts},${c.bookings},${c.conversions}`,
-//         )
-//         .join("\n");
-//     const blob = new Blob([csvContent], { type: "text/csv" });
-//     const url = URL.createObjectURL(blob);
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = "campaigns.csv";
-//     a.click();
-//     URL.revokeObjectURL(url);
-//   };
-
-//   const handleDelete = (id: string) => {
-//     deleteCampaign(id);
-//     setCampaignsState(getCampaigns());
-//     if (selectedCampaign?.id === id) setSelectedCampaign(null);
-//   };
-
-//   const handleSaveCampaign = () => {
-//     if (editingCampaign) {
-//       updateCampaign(editingCampaign.id, formData);
-//       setCampaignsState(getCampaigns());
-//     } else {
-//       const newCampaign: Campaign = {
-//         id: `camp-${Date.now()}`,
-//         name: formData.name || "New Campaign",
-//         type: (formData.type as any) || "service_reminder",
-//         status: (formData.status as any) || "draft",
-//         brand: formData.brand || "Toyota",
-//         location: formData.location || "HQ",
-//         totalContacts: 0,
-//         contactsAttempted: 0,
-//         contactsReached: 0,
-//         bookings: 0,
-//         conversions: 0,
-//         conversionRate: 0,
-//         answerRate: 0,
-//         startDate: formData.startDate || new Date().toISOString().split("T")[0],
-//         endDate: formData.endDate || new Date().toISOString().split("T")[0],
-//         scheduledTime: formData.scheduledTime || "09:00 AM - 05:00 PM",
-//         maxAttempts: 3,
-//         attemptsCompleted: 0,
-//         revenueImpact: 0,
-//         createdAt: new Date().toISOString(),
-//         updatedAt: new Date().toISOString(),
-//         aiAgentName: "Aria",
-//         script: "",
-//         tags: [],
-//       };
-//       const current = getCampaigns();
-//       setCampaigns([newCampaign, ...current]);
-//     }
-//     setIsFormOpen(false);
-//     setEditingCampaign(null);
-//     setFormData({});
-//   };
-
-//   const openEditForm = (campaign: Campaign) => {
-//     setEditingCampaign(campaign);
-//     setFormData(campaign);
-//     setIsFormOpen(true);
-//   };
-
-//   const filtered = campaigns.filter((c) => {
-//     const matchSearch =
-//       c.name.toLowerCase().includes(search.toLowerCase()) ||
-//       c.brand.toLowerCase().includes(search.toLowerCase());
-//     const matchStatus = statusFilter === "all" || c.status === statusFilter;
-//     return matchSearch && matchStatus;
-//   });
-
-//   return (
-//     <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
-//       {/* Header */}
-//       <div className="flex items-center justify-between">
-//         <div>
-//           <h1 className="text-2xl font-bold text-foreground tracking-tight">
-//             Campaigns
-//           </h1>
-//           <p className="text-sm text-muted-foreground mt-0.5">
-//             {campaigns.length} campaigns ·{" "}
-//             {campaigns.filter((c) => c.status === "active").length} active
-//           </p>
-//         </div>
-//         <Button
-//           className="bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl gap-2 h-10"
-//           onClick={() => {
-//             setEditingCampaign(null);
-//             setFormData({});
-//             setIsFormOpen(true);
-//           }}
-//         >
-//           <Plus className="w-4 h-4" /> New Campaign
-//         </Button>
-//       </div>
-//       {/* Filters */}
-//       <div className="flex items-center gap-3 flex-wrap">
-//         <div className="relative flex-1 max-w-xs">
-//           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-//           <Input
-//             placeholder="Search campaigns..."
-//             value={search}
-//             onChange={(e) => setSearch(e.target.value)}
-//             className="pl-9 h-9 rounded-xl text-sm border-border"
-//           />
-//         </div>
-//         <div className="flex items-center gap-2">
-//           {(
-//             [
-//               "all",
-//               "active",
-//               "paused",
-//               "completed",
-//               "scheduled",
-//               "draft",
-//             ] as const
-//           ).map((s) => (
-//             <button
-//               key={s}
-//               onClick={() => setStatusFilter(s)}
-//               className={cn(
-//                 "h-8 px-3 rounded-xl text-xs font-medium capitalize transition-colors",
-//                 statusFilter === s
-//                   ? "bg-[#0C1E3C] text-white"
-//                   : "bg-muted text-muted-foreground hover:bg-muted/80",
-//               )}
-//             >
-//               {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
-//             </button>
-//           ))}
-//         </div>
-//         <Button
-//           variant="outline"
-//           size="sm"
-//           className="ml-auto rounded-xl gap-2 h-9"
-//           onClick={handleExport}
-//         >
-//           <Download className="w-3.5 h-3.5" /> Export CSV
-//         </Button>
-//       </div>
-//       {/* Table */}
-//       <div className="bg-card rounded-2xl border border-border card-shadow overflow-hidden">
-//         <div className="overflow-x-auto">
-//           <table className="w-full">
-//             <thead>
-//               <tr className="border-b border-border bg-muted/30">
-//                 <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">
-//                   Campaign
-//                 </th>
-//                 <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">
-//                   Status
-//                 </th>
-//                 <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden md:table-cell">
-//                   Progress
-//                 </th>
-//                 <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden lg:table-cell">
-//                   Conversion
-//                 </th>
-//                 <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden xl:table-cell">
-//                   Revenue Impact
-//                 </th>
-//                 <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden lg:table-cell">
-//                   Schedule
-//                 </th>
-//                 <th className="text-right text-xs font-semibold text-muted-foreground px-4 py-3">
-//                   Actions
-//                 </th>
-//               </tr>
-//             </thead>
-//             <tbody className="divide-y divide-border">
-//               {filtered.map((campaign, i) => {
-//                 const progress =
-//                   campaign.totalContacts > 0
-//                     ? (campaign.contactsAttempted / campaign.totalContacts) *
-//                       100
-//                     : 0;
-
-//                 return (
-//                   <motion.tr
-//                     key={campaign.id}
-//                     initial={{ opacity: 0, y: 4 }}
-//                     animate={{ opacity: 1, y: 0 }}
-//                     transition={{ delay: i * 0.05 }}
-//                     onClick={() => setSelectedCampaign(campaign)}
-//                     className="hover:bg-muted/30 cursor-pointer transition-colors"
-//                   >
-//                     {/* Campaign name */}
-//                     <td className="px-4 py-3.5">
-//                       <div className="flex items-center gap-3">
-//                         <div className="flex-1 min-w-0">
-//                           <p className="text-sm font-medium text-foreground truncate max-w-[260px]">
-//                             {campaign.name}
-//                           </p>
-//                           <p className="text-xs text-muted-foreground mt-0.5">
-//                             {campaign.brand} · {campaign.location}
-//                             <span className="ml-2 px-1.5 py-0.5 rounded bg-muted text-[10px]">
-//                               {typeLabels[campaign.type]}
-//                             </span>
-//                           </p>
-//                         </div>
-//                       </div>
-//                     </td>
-
-//                     {/* Status */}
-//                     <td className="px-4 py-3.5">
-//                       <StatusPill status={campaign.status} />
-//                     </td>
-
-//                     {/* Progress */}
-//                     <td className="px-4 py-3.5 hidden md:table-cell">
-//                       <div className="flex items-center gap-2">
-//                         <Progress value={progress} className="h-1.5 w-24" />
-//                         <span className="text-xs text-muted-foreground">
-//                           {progress.toFixed(0)}%
-//                         </span>
-//                       </div>
-//                       <p className="text-[11px] text-muted-foreground mt-1">
-//                         {campaign.contactsAttempted.toLocaleString()} /{" "}
-//                         {campaign.totalContacts.toLocaleString()}
-//                       </p>
-//                     </td>
-
-//                     {/* Conversion */}
-//                     <td className="px-4 py-3.5 hidden lg:table-cell">
-//                       <div className="flex items-center gap-3">
-//                         <div>
-//                           <p className="text-sm font-semibold text-foreground">
-//                             {campaign.conversionRate}%
-//                           </p>
-//                           <p className="text-[11px] text-muted-foreground">
-//                             {campaign.conversions} converted
-//                           </p>
-//                         </div>
-//                         <div className="text-right">
-//                           <p className="text-xs font-medium text-foreground">
-//                             {campaign.answerRate}%
-//                           </p>
-//                           <p className="text-[11px] text-muted-foreground">
-//                             answer rate
-//                           </p>
-//                         </div>
-//                       </div>
-//                     </td>
-
-//                     {/* Revenue */}
-//                     <td className="px-4 py-3.5 hidden xl:table-cell">
-//                       <p className="text-sm font-semibold text-foreground">
-//                         {campaign.revenueImpact > 0
-//                           ? `$${(campaign.revenueImpact / 1000).toFixed(0)}K`
-//                           : "—"}
-//                       </p>
-//                       <p className="text-[11px] text-muted-foreground">
-//                         {campaign.bookings} bookings
-//                       </p>
-//                     </td>
-
-//                     {/* Schedule */}
-//                     <td className="px-4 py-3.5 hidden lg:table-cell">
-//                       <p className="text-xs text-foreground">
-//                         {campaign.scheduledTime}
-//                       </p>
-//                       <p className="text-[11px] text-muted-foreground">
-//                         {campaign.startDate} → {campaign.endDate}
-//                       </p>
-//                     </td>
-
-//                     {/* Actions */}
-//                     <td className="px-4 py-3.5">
-//                       <div className="flex items-center justify-end gap-1">
-//                         <DropdownMenu>
-//                           <DropdownMenuTrigger>
-//                             <Button
-//                               variant="ghost"
-//                               size="sm"
-//                               className="h-7 w-7 p-0 rounded-lg"
-//                               onClick={(e) => e.stopPropagation()}
-//                             >
-//                               <MoreHorizontal className="w-4 h-4" />
-//                             </Button>
-//                           </DropdownMenuTrigger>
-//                           <DropdownMenuContent className="rounded-xl">
-//                             <DropdownMenuItem
-//                               onClick={() => setSelectedCampaign(campaign)}
-//                             >
-//                               View Details
-//                             </DropdownMenuItem>
-//                             <DropdownMenuItem
-//                               onClick={() => openEditForm(campaign)}
-//                             >
-//                               Edit Campaign
-//                             </DropdownMenuItem>
-//                             {/* {campaign.status === "active" ? (
-//                               <DropdownMenuItem
-//                                 onClick={() =>
-//                                   setCampaigns(
-//                                     campaigns.map((c) =>
-//                                       c.id === campaign.id
-//                                         ? { ...c, status: "paused" }
-//                                         : c,
-//                                     ),
-//                                   )
-//                                 }
-//                               >
-//                                 Pause Campaign
-//                               </DropdownMenuItem>
-//                             ) : campaign.status === "paused" ? (
-//                               <DropdownMenuItem
-//                                 onClick={() =>
-//                                   setCampaigns(
-//                                     campaigns.map((c) =>
-//                                       c.id === campaign.id
-//                                         ? { ...c, status: "active" }
-//                                         : c,
-//                                     ),
-//                                   )
-//                                 }
-//                               >
-//                                 Resume Campaign
-//                               </DropdownMenuItem>
-//                             ) : null} */}
-//                             <DropdownMenuSeparator />
-//                             <DropdownMenuItem
-//                               className="text-destructive"
-//                               onClick={() => handleDelete(campaign.id)}
-//                             >
-//                               Delete
-//                             </DropdownMenuItem>
-//                           </DropdownMenuContent>
-//                         </DropdownMenu>
-//                         <Button
-//                           variant="ghost"
-//                           size="sm"
-//                           className="h-7 px-2 rounded-lg text-xs"
-//                           onClick={(e) => {
-//                             e.stopPropagation();
-//                             setSelectedCampaign(campaign);
-//                           }}
-//                         >
-//                           <ChevronRight className="w-4 h-4" />
-//                         </Button>
-//                       </div>
-//                     </td>
-//                   </motion.tr>
-//                 );
-//               })}
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-//       {/* Campaign Details Drawer */}
-//       <Sheet
-//         open={!!selectedCampaign}
-//         onOpenChange={() => setSelectedCampaign(null)}
-//       >
-//         <SheetContent className="w-[420px] sm:max-w-[420px] p-0 overflow-y-auto">
-//           {selectedCampaign && (
-//             <>
-//               {/* Header */}
-//               <div className="bg-[#0C1E3C] p-6 text-white">
-//                 <div className="flex items-start justify-between mb-4">
-//                   <StatusPill status={selectedCampaign.status} />
-//                   <button
-//                     onClick={() => setSelectedCampaign(null)}
-//                     className="text-white/60 hover:text-white"
-//                   >
-//                     <X className="w-4 h-4" />
-//                   </button>
-//                 </div>
-//                 <h2 className="text-lg font-bold leading-snug mb-1">
-//                   {selectedCampaign.name}
-//                 </h2>
-//                 <p className="text-white/60 text-sm">
-//                   {selectedCampaign.brand} · {selectedCampaign.location}
-//                 </p>
-//               </div>
-
-//               {/* Stats grid */}
-//               <div className="grid grid-cols-2 gap-px bg-border m-4 rounded-2xl overflow-hidden">
-//                 {[
-//                   {
-//                     label: "Total Contacts",
-//                     value: selectedCampaign.totalContacts.toLocaleString(),
-//                   },
-//                   {
-//                     label: "Contacted",
-//                     value: selectedCampaign.contactsReached.toLocaleString(),
-//                   },
-//                   { label: "Bookings", value: selectedCampaign.bookings },
-//                   { label: "Conversions", value: selectedCampaign.conversions },
-//                   {
-//                     label: "Answer Rate",
-//                     value: `${selectedCampaign.answerRate}%`,
-//                   },
-//                   {
-//                     label: "Conversion Rate",
-//                     value: `${selectedCampaign.conversionRate}%`,
-//                   },
-//                   {
-//                     label: "Revenue Impact",
-//                     value:
-//                       selectedCampaign.revenueImpact > 0
-//                         ? `$${(selectedCampaign.revenueImpact / 1000).toFixed(0)}K`
-//                         : "—",
-//                   },
-//                   {
-//                     label: "Max Attempts",
-//                     value: selectedCampaign.maxAttempts,
-//                   },
-//                 ].map((s) => (
-//                   <div key={s.label} className="bg-card p-3">
-//                     <p className="text-[11px] text-muted-foreground">
-//                       {s.label}
-//                     </p>
-//                     <p className="text-base font-bold text-foreground mt-0.5">
-//                       {s.value}
-//                     </p>
-//                   </div>
-//                 ))}
-//               </div>
-
-//               {/* Progress */}
-//               <div className="px-4 pb-4">
-//                 <p className="text-xs font-medium text-foreground mb-2">
-//                   Campaign Progress
-//                 </p>
-//                 <Progress
-//                   value={
-//                     selectedCampaign.totalContacts > 0
-//                       ? (selectedCampaign.contactsAttempted /
-//                           selectedCampaign.totalContacts) *
-//                         100
-//                       : 0
-//                   }
-//                   className="h-2"
-//                 />
-//                 <p className="text-xs text-muted-foreground mt-1">
-//                   {selectedCampaign.contactsAttempted.toLocaleString()} of{" "}
-//                   {selectedCampaign.totalContacts.toLocaleString()} contacts
-//                   attempted
-//                 </p>
-//               </div>
-
-//               {/* Details */}
-//               <div className="px-4 pb-4 space-y-3">
-//                 {[
-//                   { label: "AI Agent", value: selectedCampaign.aiAgentName },
-//                   { label: "Schedule", value: selectedCampaign.scheduledTime },
-//                   { label: "Start Date", value: selectedCampaign.startDate },
-//                   { label: "End Date", value: selectedCampaign.endDate },
-//                   {
-//                     label: "Campaign Type",
-//                     value: typeLabels[selectedCampaign.type],
-//                   },
-//                   { label: "Tags", value: selectedCampaign.tags.join(", ") },
-//                 ].map((d) => (
-//                   <div key={d.label} className="flex justify-between">
-//                     <span className="text-xs text-muted-foreground">
-//                       {d.label}
-//                     </span>
-//                     <span className="text-xs font-medium text-foreground text-right max-w-[200px]">
-//                       {d.value}
-//                     </span>
-//                   </div>
-//                 ))}
-//               </div>
-
-//               {/* Actions */}
-//               <div className="flex gap-2 px-4 pb-6">
-//                 <Button className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl text-sm">
-//                   View Full Details
-//                 </Button>
-//                 {selectedCampaign.status === "active" && (
-//                   <Button
-//                     variant="outline"
-//                     className="rounded-xl gap-2 text-sm"
-//                   >
-//                     <Pause className="w-3.5 h-3.5" /> Pause
-//                   </Button>
-//                 )}
-//               </div>
-//             </>
-//           )}
-//         </SheetContent>
-//       </Sheet>{" "}
-//       {/* ← was missing; Edit Sheet was incorrectly nested inside here */}
-//       {/* Create/Edit Campaign Sheet */}
-//       <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
-//         <SheetContent className="w-[420px] sm:max-w-[420px] p-0 overflow-y-auto">
-//           <div className="p-6">
-//             <SheetHeader className="mb-6">
-//               <SheetTitle>
-// //                 {editingCampaign ? "Edit Campaign" : "New Campaign"}
-// //               </SheetTitle>
-// //               <SheetDescription>
-// //                 {editingCampaign
-// //                   ? "Update the campaign details below."
-// //                   : "Create a new AI voice campaign."}
-// //               </SheetDescription>
-// //             </SheetHeader>
-
-// //             <div className="space-y-4">
-// //               <div>
-// //                 <label className="text-sm font-medium mb-1 block">
-// //                   Campaign Name
-// //                 </label>
-// //                 <Input
-// //                   value={formData.name || ""}
-// //                   onChange={(e) =>
-// //                     setFormData({ ...formData, name: e.target.value })
-// //                   }
-// //                   placeholder="e.g. Winter Service Drive"
-// //                 />
-// //               </div>
-
-// //               <div>
-// //                 <label className="text-sm font-medium mb-1 block">Brand</label>
-// //                 <select
-// //                   className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-// //                   value={formData.brand || "Toyota"}
-// //                   onChange={(e) =>
-// //                     setFormData({ ...formData, brand: e.target.value })
-// //                   }
-// //                 >
-// //                   <option value="Toyota">Toyota</option>
-// //                   <option value="Mercedes-Benz">Mercedes-Benz</option>
-// //                   <option value="Isuzu UTE">Isuzu UTE</option>
-// //                   <option value="Mahindra">Mahindra</option>
-// //                 </select>
-// //               </div>
-
-// //               <div>
-// //                 <label className="text-sm font-medium mb-1 block">
-// //                   Campaign Type
-// //                 </label>
-// //                 <select
-// //                   className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-// //                   value={formData.type || "service_reminder"}
-// //                   onChange={(e) =>
-// //                     setFormData({ ...formData, type: e.target.value as any })
-// //                   }
-// //                 >
-// //                   <option value="service_reminder">Service Reminder</option>
-// //                   <option value="upgrade_offer">Upgrade Offer</option>
-// //                   <option value="finance_renewal">Finance Renewal</option>
-// //                   <option value="reengagement">Re-engagement</option>
-// //                 </select>
-// //               </div>
-
-// //               <div>
-// //                 <label className="text-sm font-medium mb-1 block">Status</label>
-// //                 <select
-// //                   className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-// //                   value={formData.status || "draft"}
-// //                   onChange={(e) =>
-// //                     setFormData({ ...formData, status: e.target.value as any })
-// //                   }
-// //                 >
-// //                   <option value="draft">Draft</option>
-// //                   <option value="active">Active</option>
-// //                   <option value="paused">Paused</option>
-// //                   <option value="scheduled">Scheduled</option>
-// //                 </select>
-// //               </div>
-
-// //               <div className="grid grid-cols-2 gap-4">
-// //                 <div>
-// //                   <label className="text-sm font-medium mb-1 block">
-// //                     Start Date
-// //                   </label>
-// //                   <Input
-// //                     type="date"
-// //                     value={formData.startDate || ""}
-// //                     onChange={(e) =>
-// //                       setFormData({ ...formData, startDate: e.target.value })
-// //                     }
-// //                   />
-// //                 </div>
-// //                 <div>
-// //                   <label className="text-sm font-medium mb-1 block">
-// //                     End Date
-// //                   </label>
-// //                   <Input
-// //                     type="date"
-// //                     value={formData.endDate || ""}
-// //                     onChange={(e) =>
-// //                       setFormData({ ...formData, endDate: e.target.value })
-// //                     }
-// //                   />
-// //                 </div>
-// //               </div>
-// //             </div>
-
-// //             <div className="mt-8 flex gap-3">
-// //               <Button
-// //                 variant="outline"
-// //                 className="flex-1"
-// //                 onClick={() => setIsFormOpen(false)}
-// //               >
-// //                 Cancel
-// //               </Button>
-// //               <Button
-// //                 className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white"
-// //                 onClick={handleSaveCampaign}
-// //               >
-// //                 {editingCampaign ? "Save Changes" : "Create Campaign"}
-// //               </Button>
-// //             </div>
-// //           </div>
-// //         </SheetContent>
-// //       </Sheet>
-// //     </div>
-// //   );
-// // }
-
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import { motion } from "framer-motion";
-// import { Plus, Search, Download, MoreHorizontal, ChevronRight } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { StatusPill } from "@/components/ui/status-pill";
-// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-// import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-// import { Progress } from "@/components/ui/progress";
-// import type { Campaign } from "@/types";
-
-// const API_BASE = "http://localhost:4051";
-
-// const typeLabels: Record<string, string> = {
-//   service_reminder: "Service Reminder",
-//   upgrade_offer: "Upgrade Offer",
-//   reengagement: "Re-engagement",
-//   finance_renewal: "Finance Renewal",
-//   parts_upsell: "Parts Upsell",
-// };
-
-// export default function CampaignsPage() {
-//   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-//   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
-//   const [isFormOpen, setIsFormOpen] = useState(false);
-//   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
-//   const [formData, setFormData] = useState<Partial<Campaign>>({});
-//   const [search, setSearch] = useState("");
-//   const [statusFilter, setStatusFilter] = useState("all");
-
-//   const fetchCampaigns = async () => {
-//     const res = await fetch(`${API_BASE}/api/campaigns`);
-//     const data = await res.json();
-//     setCampaigns(data);
-//   };
-
-//   useEffect(() => {
-//     fetchCampaigns();
-//   }, []);
-
-//   const handleSaveCampaign = async () => {
-//     if (editingCampaign) {
-//       await fetch(`${API_BASE}/api/campaigns/${editingCampaign.id}`, {
-//         method: "PATCH",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(formData),
-//       });
-//     } else {
-//       await fetch(`${API_BASE}/api/campaigns`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(formData),
-//       });
-//     }
-//     setIsFormOpen(false);
-//     setEditingCampaign(null);
-//     fetchCampaigns();
-//   };
-
-//   const handleDelete = async (id: string) => {
-//     if (confirm("Delete this campaign?")) {
-//       await fetch(`${API_BASE}/api/campaigns/${id}`, { method: "DELETE" });
-//       fetchCampaigns();
-//       if (selectedCampaign?.id === id) setSelectedCampaign(null);
-//     }
-//   };
-
-//   const filteredCampaigns = campaigns.filter((c) => {
-//     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
-//     const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-//     return matchesSearch && matchesStatus;
-//   });
-
-//   return (
-//     <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
-//       <div className="flex items-center justify-between">
-//         <div>
-//           <h1 className="text-2xl font-bold tracking-tight">Campaigns</h1>
-//           <p className="text-sm text-muted-foreground">
-//             {campaigns.length} campaigns • {campaigns.filter(c => c.status === "active").length} active
-//           </p>
-//         </div>
-//         <Button className="bg-[#0C1E3C]" onClick={() => { setEditingCampaign(null); setFormData({}); setIsFormOpen(true); }}>
-//           <Plus className="mr-2 w-4 h-4" /> New Campaign
-//         </Button>
-//       </div>
-
-//       <div className="flex gap-3 items-center">
-//         <div className="relative flex-1 max-w-md">
-//           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-//           <Input
-//             placeholder="Search campaigns..."
-//             value={search}
-//             onChange={(e) => setSearch(e.target.value)}
-//             className="pl-10 rounded-xl"
-//           />
-//         </div>
-//         {["all", "active", "paused", "completed", "draft"].map((s) => (
-//           <button
-//             key={s}
-//             onClick={() => setStatusFilter(s)}
-//             className={`px-4 py-2 rounded-xl text-sm capitalize ${statusFilter === s ? "bg-[#0C1E3C] text-white" : "bg-muted hover:bg-muted/80"}`}
-//           >
-//             {s}
-//           </button>
-//         ))}
-//         <Button variant="outline" onClick={() => window.open(`${API_BASE}/api/campaigns/export-csv`)}>
-//           <Download className="w-4 h-4 mr-2" /> Export
-//         </Button>
-//       </div>
-
-//       {/* Table */}
-//       <div className="bg-card rounded-2xl border border-border overflow-hidden">
-//         <table className="w-full">
-//           <thead>
-//             <tr className="bg-muted/50 border-b">
-//               <th className="text-left px-6 py-4">Campaign</th>
-//               <th className="text-left px-6 py-4">Status</th>
-//               <th className="text-left px-6 py-4 hidden md:table-cell">Progress</th>
-//               <th className="text-left px-6 py-4 hidden lg:table-cell">Conversion</th>
-//               <th className="text-right px-6 py-4">Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {filteredCampaigns.map((campaign) => {
-//               const progress = campaign.totalContacts > 0 ? (campaign.contactsAttempted / campaign.totalContacts) * 100 : 0;
-//               return (
-//                 <tr key={campaign.id} className="border-t hover:bg-muted/50 cursor-pointer" onClick={() => setSelectedCampaign(campaign)}>
-//                   <td className="px-6 py-4">
-//                     <p className="font-medium">{campaign.name}</p>
-//                     <p className="text-sm text-muted-foreground">{campaign.brand} • {typeLabels[campaign.type]}</p>
-//                   </td>
-//                   <td className="px-6 py-4">
-//                     <StatusPill status={campaign.status} />
-//                   </td>
-//                   <td className="px-6 py-4 hidden md:table-cell">
-//                     <Progress value={progress} className="w-24" />
-//                     <p className="text-xs text-muted-foreground mt-1">
-//                       {campaign.contactsAttempted} / {campaign.totalContacts}
-//                     </p>
-//                   </td>
-//                   <td className="px-6 py-4 hidden lg:table-cell text-sm">
-//                     {campaign.conversionRate}% conversion
-//                   </td>
-//                   <td className="px-6 py-4 text-right">
-//                     <DropdownMenu>
-//                       <DropdownMenuTrigger asChild>
-//                         <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
-//                           <MoreHorizontal className="w-4 h-4" />
-//                         </Button>
-//                       </DropdownMenuTrigger>
-//                       <DropdownMenuContent>
-//                         <DropdownMenuItem onClick={() => setSelectedCampaign(campaign)}>View Details</DropdownMenuItem>
-//                         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingCampaign(campaign); setFormData(campaign); setIsFormOpen(true); }}>
-//                           Edit
-//                         </DropdownMenuItem>
-//                         <DropdownMenuSeparator />
-//                         <DropdownMenuItem className="text-red-600" onClick={(e) => { e.stopPropagation(); handleDelete(campaign.id); }}>
-//                           Delete
-//                         </DropdownMenuItem>
-//                       </DropdownMenuContent>
-//                     </DropdownMenu>
-//                   </td>
-//                 </tr>
-//               );
-//             })}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* Campaign Detail Sheet */}
-//       <Sheet open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>
-//         <SheetContent className="w-[440px] sm:w-[460px]">
-//           {selectedCampaign && (
-//             <div className="space-y-8">
-//               <div>
-//                 <StatusPill status={selectedCampaign.status} />
-//                 <h2 className="text-2xl font-bold mt-2">{selectedCampaign.name}</h2>
-//               </div>
-
-//               <div className="grid grid-cols-2 gap-4">
-//                 {[
-//                   ["Total Contacts", selectedCampaign.totalContacts],
-//                   ["Bookings", selectedCampaign.bookings],
-//                   ["Answer Rate", `${selectedCampaign.answerRate}%`],
-//                   ["Conversion Rate", `${selectedCampaign.conversionRate}%`],
-//                 ].map(([label, value]) => (
-//                   <div key={label} className="bg-muted/50 p-4 rounded-xl">
-//                     <p className="text-xs text-muted-foreground">{label}</p>
-//                     <p className="text-2xl font-semibold mt-1">{value}</p>
-//                   </div>
-//                 ))}
-//               </div>
-
-//               <div>
-//                 <p className="text-sm font-medium mb-2">Progress</p>
-//                 <Progress value={(selectedCampaign.contactsAttempted / selectedCampaign.totalContacts) * 100 || 0} />
-//               </div>
-//             </div>
-//           )}
-//         </SheetContent>
-//       </Sheet>
-
-//       {/* Create/Edit Sheet */}
-//       <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
-//         <SheetContent>
-//           <SheetHeader>
-//             <SheetTitle>{editingCampaign ? "Edit Campaign" : "New Campaign"}</SheetTitle>
-//             <SheetDescription>Fill in the campaign details below.</SheetDescription>
-//           </SheetHeader>
-
-//           <div className="space-y-5 mt-8">
-//             <Input
-//               placeholder="Campaign Name"
-//               value={formData.name || ""}
-//               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-//             />
-
-//             <select
-//               className="w-full border rounded-md p-3"
-//               value={formData.type || "service_reminder"}
-//               onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-//             >
-//               {Object.keys(typeLabels).map((key) => (
-//                 <option key={key} value={key}>{typeLabels[key]}</option>
-//               ))}
-//             </select>
-
-//             <Button onClick={handleSaveCampaign} className="w-full bg-[#0C1E3C]">
-//               {editingCampaign ? "Save Changes" : "Create Campaign"}
-//             </Button>
-//           </div>
-//         </SheetContent>
-//       </Sheet>
-//     </div>
-//   );
-// }
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   Search,
-  Filter,
   Download,
   MoreHorizontal,
   ChevronRight,
-  Users,
-  Phone,
-  Calendar,
-  TrendingUp,
-  Play,
   Pause,
-  CheckCircle2,
-  Clock,
   X,
-  Trash2,
-  Edit2,
+  Loader2,
+  RefreshCw,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusPill } from "@/components/ui/status-pill";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -977,10 +32,12 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { mockCampaigns } from "@/lib/mock-data";
-import { getCampaigns, setCampaigns as saveCampaigns, updateCampaign, deleteCampaign, initializeStorage } from "@/lib/storage";
-import type { Campaign } from "@/types";
+import { apiClient } from "@/lib/api-client";
+import type { Campaign, CampaignStatus, CampaignType } from "@/types";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const typeLabels: Record<string, string> = {
   service_reminder: "Service Reminder",
@@ -990,39 +47,213 @@ const typeLabels: Record<string, string> = {
   parts_upsell: "Parts Upsell",
 };
 
-export default function CampaignsPage() {
-  const [campaigns, setCampaignsState] = useState<Campaign[]>([]);
-  const [search, setSearch] = useState("");
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
-    null,
+const STATUS_OPTIONS = ["all", "active", "paused", "completed", "scheduled", "draft"] as const;
+const TYPE_OPTIONS = [
+  { value: "", label: "All Types" },
+  { value: "service_reminder", label: "Service Reminder" },
+  { value: "upgrade_offer", label: "Upgrade Offer" },
+  { value: "reengagement", label: "Re-engagement" },
+  { value: "finance_renewal", label: "Finance Renewal" },
+  { value: "parts_upsell", label: "Parts Upsell" },
+];
+
+// ─── API response shape ───────────────────────────────────────────────────────
+
+interface APICampaign {
+  _id: string;
+  name: string;
+  type: string;
+  status: string;
+  brand: string;
+  location: string;
+  totalContacts: number;
+  contactsAttempted: number;
+  contactsReached: number;
+  bookings: number;
+  conversions: number;
+  conversionRate: number;
+  answerRate: number;
+  startDate: string;
+  endDate: string;
+  scheduledTime: string;
+  maxAttempts: number;
+  attemptsCompleted: number;
+  revenueImpact: number;
+  aiAgentName: string;
+  script: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CampaignsResponse {
+  success: boolean;
+  data: APICampaign[];
+  count: number;
+}
+
+// Map API shape → Campaign type (replaces _id with id)
+function mapCampaign(c: APICampaign): Campaign {
+  return {
+    id: c._id,
+    name: c.name,
+    type: c.type as CampaignType,
+    status: c.status as CampaignStatus,
+    brand: c.brand,
+    location: c.location,
+    totalContacts: c.totalContacts,
+    contactsAttempted: c.contactsAttempted,
+    contactsReached: c.contactsReached,
+    bookings: c.bookings,
+    conversions: c.conversions,
+    conversionRate: c.conversionRate,
+    answerRate: c.answerRate,
+    startDate: c.startDate,
+    endDate: c.endDate,
+    scheduledTime: c.scheduledTime,
+    maxAttempts: c.maxAttempts,
+    attemptsCompleted: c.attemptsCompleted,
+    revenueImpact: c.revenueImpact,
+    aiAgentName: c.aiAgentName,
+    script: c.script,
+    tags: c.tags ?? [],
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
+  };
+}
+
+// ─── Filter state ─────────────────────────────────────────────────────────────
+
+interface Filters {
+  search: string;
+  status: string;
+  brand: string;
+  location: string;
+  type: string;
+}
+
+// ─── Select component ─────────────────────────────────────────────────────────
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-9 pl-3 pr-8 rounded-xl text-xs font-medium border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 transition-all appearance-none cursor-pointer min-w-[130px]"
+      >
+        <option value="">{label}</option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-muted-foreground">
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+    </div>
   );
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
+export default function CampaignsPage() {
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [formData, setFormData] = useState<Partial<Campaign>>({});
+  const [formLoading, setFormLoading] = useState(false);
 
-  // Load campaigns from localStorage on mount
-  useEffect(() => {
-    initializeStorage();
-    setCampaignsState(getCampaigns());
+  const [filters, setFilters] = useState<Filters>({
+    search: "",
+    status: "",
+    brand: "",
+    location: "",
+    type: "",
+  });
+
+  // Debounce search input
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ─── Fetch ────────────────────────────────────────────────────────────────
+
+  const fetchCampaigns = useCallback(async (f: Filters) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (f.search)   params.set("search",   f.search);
+      if (f.status)   params.set("status",   f.status);
+      if (f.brand)    params.set("brand",    f.brand);
+      if (f.location) params.set("location", f.location);
+      if (f.type)     params.set("type",     f.type);
+
+      const qs = params.toString();
+      const res = await apiClient<CampaignsResponse>(
+        `api/campaigns${qs ? `?${qs}` : ""}`
+      );
+
+      if (res.success) {
+        setCampaigns(res.data.map(mapCampaign));
+        setTotal(res.count);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to load campaigns");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Sync state changes to localStorage
-  const setCampaigns = (newCampaigns: Campaign[]) => {
-    setCampaignsState(newCampaigns);
-    saveCampaigns(newCampaigns);
+  // Fetch on filter change (debounce search)
+  useEffect(() => {
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    searchDebounce.current = setTimeout(() => {
+      fetchCampaigns(filters);
+    }, filters.search ? 400 : 0);
+    return () => {
+      if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    };
+  }, [filters, fetchCampaigns]);
+
+  // ─── Filter helpers ───────────────────────────────────────────────────────
+
+  const setFilter = (key: keyof Filters, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
+  const clearFilters = () => {
+    setFilters({ search: "", status: "", brand: "", location: "", type: "" });
+  };
+
+  const hasActiveFilters =
+    filters.search || filters.status || filters.brand || filters.location || filters.type;
+
+  // ─── CSV Export ───────────────────────────────────────────────────────────
+
   const handleExport = () => {
-    const csvContent =
-      "id,name,type,status,brand,location,totalContacts,bookings,conversions\n" +
-      campaigns
-        .map(
-          (c) =>
-            `"${c.id}","${c.name}","${c.type}","${c.status}","${c.brand}","${c.location}",${c.totalContacts},${c.bookings},${c.conversions}`,
-        )
-        .join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
+    const headers = "id,name,type,status,brand,location,totalContacts,bookings,conversions,conversionRate,answerRate\n";
+    const rows = campaigns
+      .map(
+        (c) =>
+          `"${c.id}","${c.name}","${c.type}","${c.status}","${c.brand}","${c.location}",${c.totalContacts},${c.bookings},${c.conversions},${c.conversionRate},${c.answerRate}`
+      )
+      .join("\n");
+    const blob = new Blob([headers + rows], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -1031,49 +262,33 @@ export default function CampaignsPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleDelete = (id: string) => {
-    deleteCampaign(id);
-    setCampaignsState(getCampaigns());
-    if (selectedCampaign?.id === id) setSelectedCampaign(null);
-  };
+  // ─── Form save ────────────────────────────────────────────────────────────
 
-  const handleSaveCampaign = () => {
-    if (editingCampaign) {
-      updateCampaign(editingCampaign.id, formData);
-      setCampaignsState(getCampaigns());
-    } else {
-      const newCampaign: Campaign = {
-        id: `camp-${Date.now()}`,
-        name: formData.name || "New Campaign",
-        type: (formData.type as any) || "service_reminder",
-        status: (formData.status as any) || "draft",
-        brand: formData.brand || "Toyota",
-        location: formData.location || "HQ",
-        totalContacts: 0,
-        contactsAttempted: 0,
-        contactsReached: 0,
-        bookings: 0,
-        conversions: 0,
-        conversionRate: 0,
-        answerRate: 0,
-        startDate: formData.startDate || new Date().toISOString().split("T")[0],
-        endDate: formData.endDate || new Date().toISOString().split("T")[0],
-        scheduledTime: formData.scheduledTime || "09:00 AM - 05:00 PM",
-        maxAttempts: 3,
-        attemptsCompleted: 0,
-        revenueImpact: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        aiAgentName: "Aria",
-        script: "",
-        tags: [],
-      };
-      const current = getCampaigns();
-      setCampaigns([newCampaign, ...current]);
+  const handleSaveCampaign = async () => {
+    setFormLoading(true);
+    try {
+      if (editingCampaign) {
+        await apiClient(`api/campaigns/${editingCampaign.id}`, {
+          method: "PATCH",
+          body: formData,
+        });
+        toast.success("Campaign updated");
+      } else {
+        await apiClient("api/campaigns", {
+          method: "POST",
+          body: formData,
+        });
+        toast.success("Campaign created");
+      }
+      setIsFormOpen(false);
+      setEditingCampaign(null);
+      setFormData({});
+      fetchCampaigns(filters);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save campaign");
+    } finally {
+      setFormLoading(false);
     }
-    setIsFormOpen(false);
-    setEditingCampaign(null);
-    setFormData({});
   };
 
   const openEditForm = (campaign: Campaign) => {
@@ -1082,279 +297,322 @@ export default function CampaignsPage() {
     setIsFormOpen(true);
   };
 
-  const filtered = campaigns.filter((c) => {
-    const matchSearch =
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.brand.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || c.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">
             Campaigns
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {campaigns.length} campaigns ·{" "}
-            {campaigns.filter((c) => c.status === "active").length} active
+            {loading ? "Loading..." : `${total} campaigns · ${campaigns.filter((c) => c.status === "active").length} active`}
           </p>
         </div>
-        <Button
-          className="bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl gap-2 h-10 w-full sm:w-auto"
-          onClick={() => {
-            setEditingCampaign(null);
-            setFormData({});
-            setIsFormOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" /> New Campaign
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl gap-2 h-9"
+            onClick={() => fetchCampaigns(filters)}
+            disabled={loading}
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
+            Refresh
+          </Button>
+          <Button
+            className="bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl gap-2 h-9 w-full sm:w-auto"
+            onClick={() => {
+              setEditingCampaign(null);
+              setFormData({});
+              setIsFormOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" /> New Campaign
+          </Button>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap">
-        <div className="relative flex-1 w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search campaigns..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 rounded-xl text-sm border-border"
-          />
-        </div>
-        
-        <div className="flex items-center gap-2 flex-wrap">
-          {(
-            [
-              "all",
-              "active",
-              "paused",
-              "completed",
-              "scheduled",
-              "draft",
-            ] as const
-          ).map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={cn(
-                "h-8 px-3 rounded-xl text-xs font-medium capitalize transition-colors whitespace-nowrap",
-                statusFilter === s
-                  ? "bg-[#0C1E3C] text-white"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80",
-              )}
-            >
-              {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
-            </button>
-          ))}
-        </div>
+      {/* Filters & Search */}
+      <div className="flex flex-col gap-3">
+        {/* Search row */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap">
+          {/* Search input */}
+          <div className="relative w-full sm:max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search campaigns by name..."
+              value={filters.search}
+              onChange={(e) => setFilter("search", e.target.value)}
+              className="pl-9 h-9 rounded-xl text-sm border-border pr-8"
+            />
+            {filters.search && (
+              <button
+                onClick={() => setFilter("search", "")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="ml-auto rounded-xl gap-2 h-9 w-full sm:w-auto"
-          onClick={handleExport}
-        >
-          <Download className="w-3.5 h-3.5" /> Export CSV
-        </Button>
+          {/* Filter dropdowns */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Filter:</span>
+            </div>
+
+            {/* Status pills */}
+            {STATUS_OPTIONS.map((s) => (
+              <button
+                key={s}
+                onClick={() => setFilter("status", s === "all" ? "" : s)}
+                className={cn(
+                  "h-9 px-3 rounded-xl text-xs font-medium capitalize transition-colors whitespace-nowrap",
+                  (s === "all" ? !filters.status : filters.status === s)
+                    ? "bg-[#0C1E3C] text-white"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                )}
+              >
+                {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap ml-auto">
+            {/* Type dropdown */}
+            <FilterSelect
+              label="All Types"
+              value={filters.type}
+              onChange={(v) => setFilter("type", v)}
+              options={TYPE_OPTIONS.filter((o) => o.value)}
+            />
+
+            {/* Brand text filter */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Brand"
+                value={filters.brand}
+                onChange={(e) => setFilter("brand", e.target.value)}
+                className="h-9 pl-3 pr-3 rounded-xl text-xs font-medium border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 transition-all w-28"
+              />
+            </div>
+
+            {/* Location text filter */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Location"
+                value={filters.location}
+                onChange={(e) => setFilter("location", e.target.value)}
+                className="h-9 pl-3 pr-3 rounded-xl text-xs font-medium border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 transition-all w-28"
+              />
+            </div>
+
+            {/* Clear */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="h-9 px-3 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground border border-border hover:border-foreground/20 transition-colors flex items-center gap-1.5"
+              >
+                <X className="w-3 h-3" /> Clear
+              </button>
+            )}
+
+            {/* Export */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl gap-2 h-9"
+              onClick={handleExport}
+              disabled={campaigns.length === 0}
+            >
+              <Download className="w-3.5 h-3.5" /> Export CSV
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Table */}
       <div className="bg-card rounded-2xl border border-border card-shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] md:min-w-0">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 w-5/12 md:w-auto">
-                  Campaign
-                </th>
-                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">
-                  Status
-                </th>
-                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden md:table-cell">
-                  Progress
-                </th>
-                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden lg:table-cell">
-                  Conversion
-                </th>
-                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden xl:table-cell">
-                  Revenue Impact
-                </th>
-                <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden lg:table-cell">
-                  Schedule
-                </th>
-                <th className="text-right text-xs font-semibold text-muted-foreground px-4 py-3 w-20">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.map((campaign, i) => {
-                const progress =
-                  campaign.totalContacts > 0
-                    ? (campaign.contactsAttempted / campaign.totalContacts) *
-                      100
-                    : 0;
-                return (
-                  <motion.tr
-                    key={campaign.id}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    onClick={() => setSelectedCampaign(campaign)}
-                    className="hover:bg-muted/30 cursor-pointer transition-colors"
-                  >
-                    {/* Campaign name */}
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">
-                            {campaign.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-0.5 flex flex-wrap gap-x-2">
-                            {campaign.brand} · {campaign.location}
-                            <span className="inline-block px-1.5 py-0.5 rounded bg-muted text-[10px] mt-0.5">
-                              {typeLabels[campaign.type]}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+            <p className="text-sm text-muted-foreground">Fetching campaigns...</p>
+          </div>
+        ) : campaigns.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+              <Search className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-foreground">No campaigns found</p>
+            <p className="text-xs text-muted-foreground">
+              {hasActiveFilters ? "Try adjusting your filters." : "Create your first campaign to get started."}
+            </p>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-xs text-cyan-600 hover:underline mt-1"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] md:min-w-0">
+              <thead>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Campaign</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3">Status</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden md:table-cell">Progress</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden lg:table-cell">Conversion</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden xl:table-cell">Revenue</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground px-4 py-3 hidden lg:table-cell">Schedule</th>
+                  <th className="text-right text-xs font-semibold text-muted-foreground px-4 py-3 w-20">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                <AnimatePresence mode="popLayout">
+                  {campaigns.map((campaign, i) => {
+                    const progress =
+                      campaign.totalContacts > 0
+                        ? (campaign.contactsAttempted / campaign.totalContacts) * 100
+                        : 0;
+                    return (
+                      <motion.tr
+                        key={campaign.id}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        onClick={() => setSelectedCampaign(campaign)}
+                        className="hover:bg-muted/30 cursor-pointer transition-colors"
+                      >
+                        {/* Campaign name */}
+                        <td className="px-4 py-3.5">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate max-w-xs">
+                              {campaign.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-1.5">
+                              <span>{campaign.brand}</span>
+                              <span className="opacity-40">·</span>
+                              <span>{campaign.location}</span>
+                              <span className="inline-block px-1.5 py-0.5 rounded bg-muted text-[10px]">
+                                {typeLabels[campaign.type] ?? campaign.type}
+                              </span>
+                            </p>
+                          </div>
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-4 py-3.5">
+                          <StatusPill status={campaign.status} />
+                        </td>
+
+                        {/* Progress */}
+                        <td className="px-4 py-3.5 hidden md:table-cell">
+                          <div className="flex items-center gap-2">
+                            <Progress value={progress} className="h-1.5 w-24" />
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {progress.toFixed(0)}%
                             </span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-1 whitespace-nowrap">
+                            {campaign.contactsAttempted.toLocaleString()} / {campaign.totalContacts.toLocaleString()}
                           </p>
-                        </div>
-                      </div>
-                    </td>
+                        </td>
 
-                    {/* Status */}
-                    <td className="px-4 py-3.5">
-                      <StatusPill status={campaign.status} />
-                    </td>
+                        {/* Conversion */}
+                        <td className="px-4 py-3.5 hidden lg:table-cell">
+                          <p className="text-sm font-semibold text-foreground">{campaign.conversionRate}%</p>
+                          <p className="text-[11px] text-muted-foreground">{campaign.conversions} converted</p>
+                        </td>
 
-                    {/* Progress */}
-                    <td className="px-4 py-3.5 hidden md:table-cell">
-                      <div className="flex items-center gap-2">
-                        <Progress value={progress} className="h-1.5 w-24" />
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {progress.toFixed(0)}%
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground mt-1 whitespace-nowrap">
-                        {campaign.contactsAttempted.toLocaleString()} /{" "}
-                        {campaign.totalContacts.toLocaleString()}
-                      </p>
-                    </td>
-
-                    {/* Conversion */}
-                    <td className="px-4 py-3.5 hidden lg:table-cell">
-                      <div className="flex items-center gap-3">
-                        <div>
+                        {/* Revenue */}
+                        <td className="px-4 py-3.5 hidden xl:table-cell">
                           <p className="text-sm font-semibold text-foreground">
-                            {campaign.conversionRate}%
+                            {campaign.revenueImpact > 0 ? `$${(campaign.revenueImpact / 1000).toFixed(0)}K` : "—"}
                           </p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {campaign.conversions} converted
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs font-medium text-foreground">
-                            {campaign.answerRate}%
-                          </p>
-                          <p className="text-[11px] text-muted-foreground">
-                            answer rate
-                          </p>
-                        </div>
-                      </div>
-                    </td>
+                          <p className="text-[11px] text-muted-foreground">{campaign.bookings} bookings</p>
+                        </td>
 
-                    {/* Revenue */}
-                    <td className="px-4 py-3.5 hidden xl:table-cell">
-                      <p className="text-sm font-semibold text-foreground">
-                        {campaign.revenueImpact > 0
-                          ? `$${(campaign.revenueImpact / 1000).toFixed(0)}K`
-                          : "—"}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {campaign.bookings} bookings
-                      </p>
-                    </td>
+                        {/* Schedule */}
+                        <td className="px-4 py-3.5 hidden lg:table-cell">
+                          <p className="text-xs text-foreground">{campaign.scheduledTime}</p>
+                          <p className="text-[11px] text-muted-foreground whitespace-nowrap">
+                            {campaign.startDate} → {campaign.endDate}
+                          </p>
+                        </td>
 
-                    {/* Schedule */}
-                    <td className="px-4 py-3.5 hidden lg:table-cell">
-                      <p className="text-xs text-foreground">
-                        {campaign.scheduledTime}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground whitespace-nowrap">
-                        {campaign.startDate} → {campaign.endDate}
-                      </p>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center justify-end gap-1">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger>
+                        {/* Actions */}
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center justify-end gap-1">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0 rounded-lg"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="rounded-xl">
+                                <DropdownMenuItem onClick={() => setSelectedCampaign(campaign)}>
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openEditForm(campaign)}>
+                                  Edit Campaign
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toast.info("Delete coming soon");
+                                  }}
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 w-7 p-0 rounded-lg"
-                              onClick={(e) => e.stopPropagation()}
+                              className="h-7 w-7 p-0 rounded-lg hidden sm:flex"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedCampaign(campaign);
+                              }}
                             >
-                              <MoreHorizontal className="w-4 h-4" />
+                              <ChevronRight className="w-4 h-4" />
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="rounded-xl">
-                            <DropdownMenuItem
-                              onClick={() => setSelectedCampaign(campaign)}
-                            >
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => openEditForm(campaign)}
-                            >
-                              Edit Campaign
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => handleDelete(campaign.id)}
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 rounded-lg text-xs hidden sm:flex"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedCampaign(campaign);
-                          }}
-                        >
-                          <ChevronRight className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile hint */}
-        {filtered.length > 0 && (
-          <div className="md:hidden text-center py-2 text-[10px] text-muted-foreground border-t">
-            Scroll horizontally to see more columns
+                          </div>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </AnimatePresence>
+              </tbody>
+            </table>
+            {campaigns.length > 0 && (
+              <div className="md:hidden text-center py-2 text-[10px] text-muted-foreground border-t">
+                Scroll horizontally to see more columns
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Campaign Details Drawer */}
-      <Sheet
-        open={!!selectedCampaign}
-        onOpenChange={() => setSelectedCampaign(null)}
-      >
+      <Sheet open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>
         <SheetContent className="w-full sm:w-[420px] sm:max-w-[420px] p-0 overflow-y-auto">
           {selectedCampaign && (
             <>
@@ -1380,24 +638,12 @@ export default function CampaignsPage() {
               {/* Stats grid */}
               <div className="grid grid-cols-2 gap-px bg-border m-4 rounded-2xl overflow-hidden">
                 {[
-                  {
-                    label: "Total Contacts",
-                    value: selectedCampaign.totalContacts.toLocaleString(),
-                  },
-                  {
-                    label: "Contacted",
-                    value: selectedCampaign.contactsReached.toLocaleString(),
-                  },
+                  { label: "Total Contacts", value: selectedCampaign.totalContacts.toLocaleString() },
+                  { label: "Contacted", value: selectedCampaign.contactsReached.toLocaleString() },
                   { label: "Bookings", value: selectedCampaign.bookings },
                   { label: "Conversions", value: selectedCampaign.conversions },
-                  {
-                    label: "Answer Rate",
-                    value: `${selectedCampaign.answerRate}%`,
-                  },
-                  {
-                    label: "Conversion Rate",
-                    value: `${selectedCampaign.conversionRate}%`,
-                  },
+                  { label: "Answer Rate", value: `${selectedCampaign.answerRate}%` },
+                  { label: "Conversion Rate", value: `${selectedCampaign.conversionRate}%` },
                   {
                     label: "Revenue Impact",
                     value:
@@ -1405,41 +651,29 @@ export default function CampaignsPage() {
                         ? `$${(selectedCampaign.revenueImpact / 1000).toFixed(0)}K`
                         : "—",
                   },
-                  {
-                    label: "Max Attempts",
-                    value: selectedCampaign.maxAttempts,
-                  },
+                  { label: "Max Attempts", value: selectedCampaign.maxAttempts },
                 ].map((s) => (
                   <div key={s.label} className="bg-card p-3">
-                    <p className="text-[11px] text-muted-foreground">
-                      {s.label}
-                    </p>
-                    <p className="text-base font-bold text-foreground mt-0.5">
-                      {s.value}
-                    </p>
+                    <p className="text-[11px] text-muted-foreground">{s.label}</p>
+                    <p className="text-base font-bold text-foreground mt-0.5">{s.value}</p>
                   </div>
                 ))}
               </div>
 
               {/* Progress */}
               <div className="px-4 pb-4">
-                <p className="text-xs font-medium text-foreground mb-2">
-                  Campaign Progress
-                </p>
+                <p className="text-xs font-medium text-foreground mb-2">Campaign Progress</p>
                 <Progress
                   value={
                     selectedCampaign.totalContacts > 0
-                      ? (selectedCampaign.contactsAttempted /
-                          selectedCampaign.totalContacts) *
-                        100
+                      ? (selectedCampaign.contactsAttempted / selectedCampaign.totalContacts) * 100
                       : 0
                   }
                   className="h-2"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   {selectedCampaign.contactsAttempted.toLocaleString()} of{" "}
-                  {selectedCampaign.totalContacts.toLocaleString()} contacts
-                  attempted
+                  {selectedCampaign.totalContacts.toLocaleString()} contacts attempted
                 </p>
               </div>
 
@@ -1450,16 +684,11 @@ export default function CampaignsPage() {
                   { label: "Schedule", value: selectedCampaign.scheduledTime },
                   { label: "Start Date", value: selectedCampaign.startDate },
                   { label: "End Date", value: selectedCampaign.endDate },
-                  {
-                    label: "Campaign Type",
-                    value: typeLabels[selectedCampaign.type],
-                  },
-                  { label: "Tags", value: selectedCampaign.tags.join(", ") || "—"},
+                  { label: "Campaign Type", value: typeLabels[selectedCampaign.type] ?? selectedCampaign.type },
+                  { label: "Tags", value: selectedCampaign.tags?.join(", ") || "—" },
                 ].map((d) => (
                   <div key={d.label} className="flex justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      {d.label}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{d.label}</span>
                     <span className="text-xs font-medium text-foreground text-right max-w-[200px]">
                       {d.value}
                     </span>
@@ -1469,14 +698,14 @@ export default function CampaignsPage() {
 
               {/* Actions */}
               <div className="flex gap-2 px-4 pb-6">
-                <Button className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl text-sm">
-                  View Full Details
+                <Button
+                  className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white rounded-xl text-sm"
+                  onClick={() => openEditForm(selectedCampaign)}
+                >
+                  Edit Campaign
                 </Button>
                 {selectedCampaign.status === "active" && (
-                  <Button
-                    variant="outline"
-                    className="rounded-xl gap-2 text-sm"
-                  >
+                  <Button variant="outline" className="rounded-xl gap-2 text-sm">
                     <Pause className="w-3.5 h-3.5" /> Pause
                   </Button>
                 )}
@@ -1486,73 +715,66 @@ export default function CampaignsPage() {
         </SheetContent>
       </Sheet>
 
-      {/* Create/Edit Campaign Sheet */}
+      {/* Create / Edit Campaign Sheet */}
       <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
         <SheetContent className="w-full sm:w-[420px] sm:max-w-[420px] p-0 overflow-y-auto">
           <div className="p-6">
             <SheetHeader className="mb-6">
-              <SheetTitle>
-                {editingCampaign ? "Edit Campaign" : "New Campaign"}
-              </SheetTitle>
+              <SheetTitle>{editingCampaign ? "Edit Campaign" : "New Campaign"}</SheetTitle>
               <SheetDescription>
-                {editingCampaign
-                  ? "Update the campaign details below."
-                  : "Create a new AI voice campaign."}
+                {editingCampaign ? "Update the campaign details below." : "Create a new AI voice campaign."}
               </SheetDescription>
             </SheetHeader>
+
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">
-                  Campaign Name
-                </label>
+                <label className="text-sm font-medium mb-1 block">Campaign Name</label>
                 <Input
                   value={formData.name || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Winter Service Drive"
                 />
               </div>
+
               <div>
                 <label className="text-sm font-medium mb-1 block">Brand</label>
-                <select
-                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  value={formData.brand || "Toyota"}
-                  onChange={(e) =>
-                    setFormData({ ...formData, brand: e.target.value })
-                  }
-                >
-                  <option value="Toyota">Toyota</option>
-                  <option value="Mercedes-Benz">Mercedes-Benz</option>
-                  <option value="Isuzu UTE">Isuzu UTE</option>
-                  <option value="Mahindra">Mahindra</option>
-                </select>
+                <Input
+                  value={formData.brand || ""}
+                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                  placeholder="Toyota, Mercedes-Benz, etc."
+                />
               </div>
+
               <div>
-                <label className="text-sm font-medium mb-1 block">
-                  Campaign Type
-                </label>
+                <label className="text-sm font-medium mb-1 block">Location</label>
+                <Input
+                  value={formData.location || ""}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="e.g. Keysborough"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Campaign Type</label>
                 <select
-                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={formData.type || "service_reminder"}
-                  onChange={(e) =>
-                    setFormData({ ...formData, type: e.target.value as any })
-                  }
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as CampaignType })}
                 >
                   <option value="service_reminder">Service Reminder</option>
                   <option value="upgrade_offer">Upgrade Offer</option>
                   <option value="finance_renewal">Finance Renewal</option>
                   <option value="reengagement">Re-engagement</option>
+                  <option value="parts_upsell">Parts Upsell</option>
                 </select>
               </div>
+
               <div>
                 <label className="text-sm font-medium mb-1 block">Status</label>
                 <select
-                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={formData.status || "draft"}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value as any })
-                  }
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value as CampaignStatus })}
                 >
                   <option value="draft">Draft</option>
                   <option value="active">Active</option>
@@ -1560,45 +782,42 @@ export default function CampaignsPage() {
                   <option value="scheduled">Scheduled</option>
                 </select>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-1 block">
-                    Start Date
-                  </label>
+                  <label className="text-sm font-medium mb-1 block">Start Date</label>
                   <Input
                     type="date"
                     value={formData.startDate || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, startDate: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1 block">
-                    End Date
-                  </label>
+                  <label className="text-sm font-medium mb-1 block">End Date</label>
                   <Input
                     type="date"
                     value={formData.endDate || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, endDate: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                   />
                 </div>
               </div>
             </div>
+
             <div className="mt-8 flex gap-3">
               <Button
                 variant="outline"
                 className="flex-1"
                 onClick={() => setIsFormOpen(false)}
+                disabled={formLoading}
               >
                 Cancel
               </Button>
               <Button
-                className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white"
+                className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white gap-2"
                 onClick={handleSaveCampaign}
+                disabled={formLoading}
               >
+                {formLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 {editingCampaign ? "Save Changes" : "Create Campaign"}
               </Button>
             </div>
