@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Bell, Search, Sun, Moon, Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { mockNotifications } from "@/lib/mock-data";
+import { fetchNotifications } from "@/lib/notifications-api";
+import type { Notification } from "@/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { CommandPalette } from "@/components/layout/CommandPalette";
@@ -27,7 +28,21 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const [commandOpen, setCommandOpen] = useState(false);
-  const unreadCount = mockNotifications.filter((n) => !n.read).length;
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const res = await fetchNotifications();
+        setNotifications(res.data);
+        setUnreadCount(res.unreadCount);
+      } catch (err) {
+        console.error("Failed to load notifications", err);
+      }
+    };
+    loadNotifications();
+  }, []);
 
 
   return (
@@ -120,7 +135,7 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
                 </Badge>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {mockNotifications.slice(0, 4).map((n) => (
+              {notifications.slice(0, 4).map((n) => (
                 <DropdownMenuItem
                   key={n.id}
                   className="flex flex-col items-start gap-0.5 rounded-xl p-3 cursor-pointer"
