@@ -1,4 +1,6 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4030/api";
+import { API_BASE_URL } from "./config";
+
+const BASE_URL = API_BASE_URL;
 
 function getToken() {
   return typeof window !== "undefined"

@@ -1,4 +1,5 @@
 import { apiFetch } from "./api";
+import { API_BASE_URL } from "./config";
 import type { Customer } from "@/types";
 
 // Map MongoDB _id → id for frontend type compatibility
@@ -74,14 +75,11 @@ export async function importCustomersCSV(
       : null;
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4030/api"}/customers/import`,
-    {
-      method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-    },
-  );
+  const res = await fetch(`${API_BASE_URL}/customers/import`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
   if (!res.ok) throw new Error("Import failed");
   const json = await res.json();
   return {
@@ -95,12 +93,9 @@ export async function exportCustomersCSV(): Promise<void> {
     typeof window !== "undefined"
       ? localStorage.getItem("patterson-crm-token")
       : null;
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4030/api"}/customers/export`,
-    {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    },
-  );
+  const res = await fetch(`${API_BASE_URL}/customers/export`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
   if (!res.ok) throw new Error("Export failed");
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
