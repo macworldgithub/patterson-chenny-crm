@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
-import { Zap, User, Lock, Mail, Building2, Bookmark, Loader2, ArrowLeft } from 'lucide-react'
+import { Zap, User, Lock, Mail, Building2, Loader2, ArrowLeft } from 'lucide-react'
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -13,29 +13,13 @@ export default function SignupPage() {
     lastName: '',
     email: '',
     password: '',
-    role: 'agent',
     dealership: '',
     brand: '',
-    status: 'active',
   })
   const [loading, setLoading] = useState(false)
   const { signup } = useAuth()
 
-  const roles = [
-    { value: 'super_admin', label: 'Super Admin' },
-    { value: 'admin', label: 'Admin' },
-    { value: 'manager', label: 'Manager' },
-    { value: 'agent', label: 'Agent' },
-    { value: 'viewer', label: 'Viewer' },
-    { value: 'finance', label: 'Finance' },
-  ]
 
-  const statuses = [
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'pending', label: 'Pending' },
-    { value: 'suspended', label: 'Suspended' },
-  ]
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -229,7 +213,7 @@ export default function SignupPage() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Bookmark className="w-4 h-4" />
+                    <Building2 className="w-4 h-4" />
                   </div>
                   <input
                     type="text"
@@ -244,58 +228,7 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Row 4: Dropdowns (Role & Status) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                  Access Role
-                </label>
-                <div className="relative">
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="block w-full px-4 py-2.5 bg-[#0F1A2E] border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all appearance-none cursor-pointer"
-                  >
-                    {roles.map((role) => (
-                      <option key={role.value} value={role.value} className="bg-[#0F1A2E] text-white">
-                        {role.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                  Initial Status
-                </label>
-                <div className="relative">
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className="block w-full px-4 py-2.5 bg-[#0F1A2E] border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all appearance-none cursor-pointer"
-                  >
-                    {statuses.map((status) => (
-                      <option key={status.value} value={status.value} className="bg-[#0F1A2E] text-white">
-                        {status.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <button
               type="submit"
