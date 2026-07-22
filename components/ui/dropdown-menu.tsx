@@ -16,7 +16,7 @@ const DropdownMenuContent = React.forwardRef<
     <MenuPrimitive.Positioner className="z-50">
       <MenuPrimitive.Popup
         className={cn(
-          'min-w-[8rem] overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-md outline-none',
+          'min-w-[8rem] overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-md outline-none dark:border-border dark:bg-card dark:text-foreground p-1',
           className
         )}
       >
@@ -34,7 +34,7 @@ const DropdownMenuItem = React.forwardRef<
   <MenuPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[focus-visible=true]:bg-accent data-[focus-visible=true]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+      'relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[focus-visible=true]:bg-muted data-[focus-visible=true]:text-foreground hover:bg-muted transition-colors [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
       className
     )}
     {...props}

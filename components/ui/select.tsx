@@ -39,7 +39,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Positioner className="relative z-50">
       <SelectPrimitive.Popup
         className={cn(
-          "w-full min-w-[8rem] overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md outline-none p-1",
+          "w-full min-w-[8rem] overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-md outline-none dark:border-border dark:bg-card dark:text-foreground p-1",
           className,
         )}
       >
@@ -69,7 +69,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none data-[focus-visible=true]:bg-accent data-[focus-visible=true]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none data-[focus-visible=true]:bg-muted data-[focus-visible=true]:text-foreground hover:bg-muted transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
     {...props}

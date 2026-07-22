@@ -14,7 +14,6 @@ import {
   XCircle,
   PhoneMissed,
   ArrowUpRight,
-  Sparkles,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { StatusPill } from "@/components/ui/status-pill";
@@ -36,6 +35,7 @@ import { fetchAuditLogs } from '@/lib/audit-api'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface TooltipPayload {
   name: string;
@@ -48,28 +48,6 @@ interface CustomTooltipProps {
   payload?: TooltipPayload[];
   label?: string | number;
 }
-
-const aiInsights = [
-  {
-    title: "Peak Call Window Detected",
-    body: "Answer rates are 23% higher between 10:00–11:30am on weekdays. Consider scheduling more calls in this window.",
-    tag: "Optimisation",
-    tagColor: "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/40 dark:text-cyan-400",
-  },
-  {
-    title: "Emma Chen — Upgrade Alert",
-    body: "Customer Emma Chen (Mercedes C-Class) has a 5/5 upgrade score. Finance ends September 2026. Recommend immediate outreach.",
-    tag: "Lead Alert",
-    tagColor:
-      "text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400",
-  },
-  {
-    title: "Campaign Health Warning",
-    body: "Isuzu D-Max Finance Renewal campaign has dropped below 50% answer rate. Review call scheduling and contact list quality.",
-    tag: "Warning",
-    tagColor: "text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400",
-  },
-];
 
 const CustomTooltip = ({
   active,
@@ -108,11 +86,15 @@ const CustomTooltip = ({
 };
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const [stats, setStats] = useState<any>(null);
   const [callStats, setCallStats] = useState<any>(null);
   const [dailyMetrics, setDailyMetrics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const userName = user?.firstName ? `${user.firstName}` : 'Good Morning'
+  const greetingText = user?.firstName ? `Good morning, ${user.firstName}` : 'Good Morning'
 
   useEffect(() => {
     const load = async () => {
@@ -220,7 +202,7 @@ export default function DashboardPage() {
             Dashboard
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Sunday 29 June 2026 · Good morning, Alex 👋
+            Sunday 29 June 2026 · {greetingText} 👋
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -420,37 +402,6 @@ export default function DashboardPage() {
                 </div>
               )
             })}
-          </div>
-        </motion.div>
-
-        {/* AI Insights */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
-          className="lg:col-span-1 bg-card rounded-2xl border border-border card-shadow overflow-hidden"
-        >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cyan-500" />
-              <h2 className="font-semibold text-sm text-foreground">AI Insights</h2>
-            </div>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400">
-              3 new
-            </span>
-          </div>
-          <div className="divide-y divide-border">
-            {aiInsights.map((insight, i) => (
-              <div key={i} className="px-5 py-3.5">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-full', insight.tagColor)}>
-                    {insight.tag}
-                  </span>
-                </div>
-                <p className="text-xs font-medium text-foreground mb-1">{insight.title}</p>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">{insight.body}</p>
-              </div>
-            ))}
           </div>
         </motion.div>
       </div>
