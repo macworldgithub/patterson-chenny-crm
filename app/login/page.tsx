@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { useAuth } from '@/contexts/AuthContext'
-import { toast } from 'sonner'
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import {
   Zap,
   Lock,
@@ -13,32 +13,34 @@ import {
   Loader2,
   Eye,
   EyeOff,
-} from 'lucide-react'
+} from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const { login } = useAuth()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!email || !password) {
-      toast.error('Please enter both email and password')
-      return
+      toast.error("Please enter both email and password");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      await login(email, password)
-      toast.success('Successfully logged in!')
+      await login(email, password);
+      toast.success("Successfully logged in!");
     } catch (error: any) {
-      toast.error(error.message || 'Login failed. Please check your credentials.')
+      toast.error(
+        error.message || "Login failed. Please check your credentials.",
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[#060D1A] overflow-hidden">
@@ -55,7 +57,7 @@ export default function LoginPage() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, type: 'spring' }}
+            transition={{ duration: 0.5, type: "spring" }}
             className="flex items-center justify-center w-12 h-12 rounded-2xl bg-cyan-500 cyan-glow mb-3"
           >
             <Zap className="w-6 h-6 text-white" />
@@ -66,7 +68,7 @@ export default function LoginPage() {
             transition={{ delay: 0.1, duration: 0.4 }}
             className="text-2xl font-bold text-white tracking-tight"
           >
-            Welcome to OmniSuiteAI
+            Welcome to Patterson Chenny
           </motion.h1>
           <motion.p
             initial={{ y: 10, opacity: 0 }}
@@ -112,7 +114,10 @@ export default function LoginPage() {
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
                   Password
                 </label>
-                <a href="#" className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline">
+                <a
+                  href="#"
+                  className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline"
+                >
                   Forgot Password?
                 </a>
               </div>
@@ -120,26 +125,26 @@ export default function LoginPage() {
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="w-4 h-4" />
                 </div>
-             <input
-  type={showPassword ? 'text' : 'password'}
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  className="block w-full pl-10 pr-11 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
-  placeholder="••••••••"
-  required
-/>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full pl-10 pr-11 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+                  placeholder="••••••••"
+                  required
+                />
 
-<button
-  type="button"
-  onClick={() => setShowPassword(!showPassword)}
-  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-cyan-400 transition-colors"
->
-  {showPassword ? (
-    <EyeOff className="w-5 h-5" />
-  ) : (
-    <Eye className="w-5 h-5" />
-  )}
-</button>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-cyan-400 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -159,13 +164,16 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center text-xs text-slate-400">
-            Don't have an account?{' '}
-            <Link href="/signup" className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline">
+            Don't have an account?{" "}
+            <Link
+              href="/signup"
+              className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline"
+            >
               Signup
             </Link>
           </div>
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
