@@ -1086,7 +1086,7 @@ export default function CustomersPage() {
               <div>
                 <label className="text-sm font-medium mb-1 block">Brand</label>
                 <select
-                  className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="w-full h-9 rounded-md border border-input bg-transparent dark:bg-[#0A0F1E] px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   value={formData.brand || 'Toyota'}
                   onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                 >

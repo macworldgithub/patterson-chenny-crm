@@ -222,7 +222,7 @@ export default function CampaignsPage() {
             className="pl-9 h-9 rounded-xl text-sm border-border"
           />
         </div>
-        
+
         <div className="flex items-center gap-2 flex-wrap">
           {(
             [
@@ -315,7 +315,7 @@ export default function CampaignsPage() {
                 const progress =
                   campaign.totalContacts > 0
                     ? (campaign.contactsAttempted / campaign.totalContacts) *
-                      100
+                    100
                     : 0;
                 return (
                   <motion.tr
@@ -544,8 +544,8 @@ export default function CampaignsPage() {
                   value={
                     selectedCampaign.totalContacts > 0
                       ? (selectedCampaign.contactsAttempted /
-                          selectedCampaign.totalContacts) *
-                        100
+                        selectedCampaign.totalContacts) *
+                      100
                       : 0
                   }
                   className="h-2"
@@ -568,7 +568,7 @@ export default function CampaignsPage() {
                     label: "Campaign Type",
                     value: typeLabels[selectedCampaign.type],
                   },
-                  { label: "Tags", value: selectedCampaign.tags.join(", ") || "—"},
+                  { label: "Tags", value: selectedCampaign.tags.join(", ") || "—" },
                 ].map((d) => (
                   <div key={d.label} className="flex justify-between">
                     <span className="text-xs text-muted-foreground">
@@ -654,7 +654,7 @@ export default function CampaignsPage() {
               <div>
                 <label className="text-sm font-medium mb-1 block">Brand</label>
                 <select
-                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0A0F1E]"
                   value={formData.brand || "Toyota"}
                   onChange={(e) =>
                     setFormData({ ...formData, brand: e.target.value })
@@ -671,7 +671,7 @@ export default function CampaignsPage() {
                   Campaign Type
                 </label>
                 <select
-                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0A0F1E]"
                   value={formData.type || "service_reminder"}
                   onChange={(e) =>
                     setFormData({ ...formData, type: e.target.value as any })
@@ -686,7 +686,7 @@ export default function CampaignsPage() {
               <div>
                 <label className="text-sm font-medium mb-1 block">Status</label>
                 <select
-                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0A0F1E]"
                   value={formData.status || "draft"}
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value as any })
