@@ -476,12 +476,6 @@ export default function CampaignsPage() {
               <div className="bg-[#0C1E3C] p-6 text-white">
                 <div className="flex items-start justify-between mb-4">
                   <StatusPill status={selectedCampaign.status} />
-                  <button
-                    onClick={() => setSelectedCampaign(null)}
-                    className="text-white/60 hover:text-white"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
                 </div>
                 <h2 className="text-lg font-bold leading-snug mb-1">
                   {selectedCampaign.name}

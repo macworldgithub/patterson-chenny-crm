@@ -38,7 +38,7 @@ export default function SignupPage() {
     setLoading(true)
     try {
       await signup(formData)
-      toast.success('Registration successful! Redirecting to login...')
+      toast.success('Account created successfully. Redirecting to login...')
     } catch (error: any) {
       toast.error(error.message || 'Registration failed. Please check your data.')
     } finally {

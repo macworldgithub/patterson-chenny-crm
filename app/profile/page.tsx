@@ -89,7 +89,7 @@ export default function ProfilePage() {
     setProfileLoading(true)
     try {
       await updateProfile({ firstName: firstName.trim(), lastName: lastName.trim(), dealership: dealership.trim(), brand: brand.trim() } as any)
-      toast.success('Profile updated successfully!')
+      toast.success('Your profile has been updated successfully.')
     } catch (err: any) {
       toast.error(err.message || 'Failed to update profile')
     } finally {
@@ -111,7 +111,7 @@ export default function ProfilePage() {
     setSecurityLoading(true)
     try {
       await changePassword(currentPassword, newPassword)
-      toast.success('Password changed successfully!')
+      toast.success('Your password has been changed securely.')
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')

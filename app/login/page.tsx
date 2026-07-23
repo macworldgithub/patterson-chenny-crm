@@ -38,7 +38,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      toast.success("Successfully logged in!");
+      toast.success("Authentication successful.");
     } catch (error: any) {
       toast.error(
         error.message || "Login failed. Please check your credentials.",
@@ -204,7 +204,7 @@ export default function LoginPage() {
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <>
-                      Continue <ArrowRight className="w-4 h-4" />
+                      Login <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
