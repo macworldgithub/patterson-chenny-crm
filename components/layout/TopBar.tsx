@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Bell, Search, Sun, Moon, Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ interface TopBarProps {
 export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [commandOpen, setCommandOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -190,7 +192,10 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="rounded-lg text-xs">
+              <DropdownMenuItem
+                className="rounded-lg text-xs cursor-pointer"
+                onClick={() => router.push('/profile')}
+              >
                 Profile Settings
               </DropdownMenuItem>
               <DropdownMenuItem className="rounded-lg text-xs">
