@@ -999,10 +999,10 @@ export default function CustomersPage() {
                   <td className="px-4 py-3.5">
                     <div className="flex items-center justify-end gap-1">
                       <DropdownMenu>
-                        <DropdownMenuTrigger>
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-lg">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
+                        <DropdownMenuTrigger
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-transparent bg-transparent text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="rounded-xl">
                           <DropdownMenuItem onClick={() => openEditForm(customer)}>Edit Customer</DropdownMenuItem>
