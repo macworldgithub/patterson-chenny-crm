@@ -13,7 +13,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { token, isLoading } = useAuth()
 
-  const isAuthPage = pathname === '/login' || pathname === '/signup'
+  const isAuthPage = pathname === '/login' || pathname === '/signup' || pathname === '/reset-password'
 
   useEffect(() => {
     if (!isLoading && !token && !isAuthPage) {
