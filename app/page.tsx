@@ -91,10 +91,11 @@ export default function DashboardPage() {
   const [callStats, setCallStats] = useState<any>(null);
   const [dailyMetrics, setDailyMetrics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const userName = user?.firstName ? `${user.firstName}` : 'Good Morning'
-  const greetingText = user?.firstName ? `Good morning, ${user.firstName}` : 'Good Morning'
+  const userName = user?.firstName ? `${user.firstName}` : 'Welcome'
+  const greetingText = user?.firstName ? `Welcome, ${user.firstName}` : 'Welcome '
 
   useEffect(() => {
     const load = async () => {
@@ -103,20 +104,32 @@ export default function DashboardPage() {
           fetchDashboardStats(),
           fetchCallStats(),
           fetchDailyMetrics(30),
-          fetchAuditLogs({ limit: 6 })
+          fetchAuditLogs({ limit: 6 }).catch(err => {
+            console.warn('Could not fetch audit logs:', err.message);
+            return { data: [] };
+          })
         ]);
         setStats(statsData);
         setCallStats(callStatsData);
         setDailyMetrics(dailyData);
         setAuditLogs(auditData.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
+        setError(err.message || 'Failed to load dashboard');
       } finally {
         setLoading(false);
       }
     };
     load();
   }, []);
+
+  if (error) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[500px]">
+        <div className="text-destructive font-medium">{error}</div>
+      </div>
+    );
+  }
 
   if (loading || !stats || !callStats) {
     return (
@@ -202,7 +215,7 @@ export default function DashboardPage() {
             Dashboard
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Sunday 29 June 2026 · {greetingText} 👋
+            Sunday 29 June 2026 · {greetingText}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
