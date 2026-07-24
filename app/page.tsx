@@ -96,23 +96,33 @@ export default function DashboardPage() {
 
   const userName = user?.firstName ? `${user.firstName}` : 'Welcome'
   const greetingText = user?.firstName ? `Welcome, ${user.firstName}` : 'Welcome '
+  const isSuperAdmin = user?.role === 'super_admin'
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [statsData, callStatsData, dailyData, auditData] = await Promise.all([
+        const requests = [
           fetchDashboardStats(),
           fetchCallStats(),
           fetchDailyMetrics(30),
-          fetchAuditLogs({ limit: 6 }).catch(err => {
-            console.warn('Could not fetch audit logs:', err.message);
-            return { data: [] };
-          })
-        ]);
+        ]
+
+        if (isSuperAdmin) {
+          requests.push(
+            fetchAuditLogs({ limit: 6 }).catch(err => {
+              console.warn('Could not fetch audit logs:', err.message);
+              return { data: [] };
+            })
+          )
+        }
+
+        const results = await Promise.all(requests)
+        const [statsData, callStatsData, dailyData, auditData] = results
+
         setStats(statsData);
         setCallStats(callStatsData);
         setDailyMetrics(dailyData);
-        setAuditLogs(auditData.data);
+        setAuditLogs(isSuperAdmin ? auditData.data : []);
       } catch (err: any) {
         console.error(err);
         setError(err.message || 'Failed to load dashboard');
@@ -121,7 +131,7 @@ export default function DashboardPage() {
       }
     };
     load();
-  }, []);
+  }, [isSuperAdmin]);
 
   if (error) {
     return (
@@ -386,38 +396,40 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Activity Feed */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.45 }}
-          className="lg:col-span-1 bg-card rounded-2xl border border-border card-shadow overflow-hidden"
-        >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-sm text-foreground">Recent Activity</h2>
-            <Link href="/notifications" className="text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1 hover:underline">
-              View all <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
-          <div className="divide-y divide-border">
-            {recentActivity.map((item: any, i: number) => {
-              const Icon = item.icon
-              return (
-                <div key={i} className="flex items-start gap-3 px-5 py-3">
-                  <Icon className={cn('w-4 h-4 mt-0.5 shrink-0', item.color)} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-foreground leading-snug">{item.text}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
-                      <Clock className="w-2.5 h-2.5" />{item.time}
-                    </p>
+      {isSuperAdmin && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Activity Feed */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.45 }}
+            className="lg:col-span-1 bg-card rounded-2xl border border-border card-shadow overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 className="font-semibold text-sm text-foreground">Recent Activity</h2>
+              <Link href="/notifications" className="text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1 hover:underline">
+                View all <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="divide-y divide-border">
+              {recentActivity.map((item: any, i: number) => {
+                const Icon = item.icon
+                return (
+                  <div key={i} className="flex items-start gap-3 px-5 py-3">
+                    <Icon className={cn('w-4 h-4 mt-0.5 shrink-0', item.color)} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-foreground leading-snug">{item.text}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5" />{item.time}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </motion.div>
-      </div>
+                )
+              })}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
