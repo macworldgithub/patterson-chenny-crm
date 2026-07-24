@@ -198,9 +198,7 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
               >
                 Profile Settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-lg text-xs">
-                Preferences
-              </DropdownMenuItem>
+            
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="rounded-lg text-xs text-destructive cursor-pointer"
