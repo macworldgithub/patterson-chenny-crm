@@ -65,7 +65,6 @@ const pages = [
     icon: BarChart3,
     description: "Reports & charts",
   },
-  { label: 'Notifications', href: '/notifications', icon: Bell, description: 'Activity feed' },
   { label: 'Integrations', href: '/integrations', icon: Plug, description: 'Connect tools & APIs' },
   { label: 'Users', href: '/users', icon: UserCog, description: 'User management' },
   { label: 'Roles & Permissions', href: '/roles', icon: ShieldCheck, description: 'Access control' },

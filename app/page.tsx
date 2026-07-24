@@ -33,7 +33,6 @@ import { fetchDashboardStats, fetchDailyMetrics } from '@/lib/analytics-api'
 import { fetchCallStats } from '@/lib/calls-api'
 import { fetchAuditLogs } from '@/lib/audit-api'
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -91,6 +90,7 @@ export default function DashboardPage() {
   const [callStats, setCallStats] = useState<any>(null);
   const [dailyMetrics, setDailyMetrics] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [showAllActivity, setShowAllActivity] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -210,6 +210,8 @@ export default function DashboardPage() {
     text: `${log.userName} ${log.action} ${log.resourceName || log.resource}`,
     time: new Date(log.timestamp).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
   }));
+
+  const activityPreview = showAllActivity ? recentActivity : recentActivity.slice(0, 4);
 
   return (
     <div className="p-4 lg:p-6 space-y-6 max-w-[1600px] mx-auto">
@@ -407,12 +409,19 @@ export default function DashboardPage() {
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <h2 className="font-semibold text-sm text-foreground">Recent Activity</h2>
-              <Link href="/notifications" className="text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1 hover:underline">
-                View all <ChevronRight className="w-3 h-3" />
-              </Link>
+              {recentActivity.length > 4 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllActivity((value) => !value)}
+                  className="text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center gap-1 hover:underline"
+                >
+                  {showAllActivity ? 'Show less' : 'View all'}
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              )}
             </div>
             <div className="divide-y divide-border">
-              {recentActivity.map((item: any, i: number) => {
+              {activityPreview.map((item: any, i: number) => {
                 const Icon = item.icon
                 return (
                   <div key={i} className="flex items-start gap-3 px-5 py-3">

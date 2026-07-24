@@ -158,13 +158,8 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <a
-                  href="/notifications"
-                  className="justify-center text-xs text-primary font-medium py-2 rounded-xl"
-                >
-                  View all notifications
-                </a>
+              <DropdownMenuItem className="justify-center text-xs text-primary font-medium py-2 rounded-xl cursor-pointer">
+                View all notifications
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
