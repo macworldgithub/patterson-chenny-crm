@@ -21,7 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
+import logo from "../../public/logo.png";
 interface NavItem {
   href: string;
   label: string;
@@ -105,9 +105,10 @@ export function Sidebar({ isOpen = true }: SidebarProps) {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-white/8">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-cyan-500 shrink-0">
+          {/* <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-cyan-500 shrink-0">
             <Zap className="w-5 h-5 text-white" />
-          </div>
+          </div> */}
+{/*           
           <AnimatePresence>
             {!collapsed && (
               <motion.div
@@ -125,7 +126,9 @@ export function Sidebar({ isOpen = true }: SidebarProps) {
                 </span>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
+
+          <img src="/logo.png" alt="Logo" />
         </div>
 
         {/* Navigation */}
