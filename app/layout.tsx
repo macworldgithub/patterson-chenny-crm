@@ -1,30 +1,31 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { ThemeProvider } from '@/contexts/ThemeContext'
-import { AuthProvider } from '@/contexts/AuthContext'
-import { LayoutWrapper } from '@/components/layout/LayoutWrapper'
-import { Toaster } from '@/components/ui/sonner'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
-    default: 'OmniSuiteAI — Patterson Cheney',
-    template: '%s | OmniSuiteAI',
+    default: "Patterson Cheney",
+    template: "%s | Patterson Cheney",
   },
-  description: 'AI-powered outbound customer engagement platform for Patterson Cheney Automotive Group.',
+  description:
+    "AI-powered outbound customer engagement platform for Patterson Cheney Automotive Group.",
   robots: { index: false },
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -37,7 +38,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
-
-

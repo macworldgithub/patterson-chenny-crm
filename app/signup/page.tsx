@@ -1,50 +1,68 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { useAuth } from '@/contexts/AuthContext'
-import { toast } from 'sonner'
-import { Zap, User, Lock, Mail, Building2, Loader2, ArrowLeft } from 'lucide-react'
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import {
+  Zap,
+  User,
+  Lock,
+  Mail,
+  Building2,
+  Loader2,
+  ArrowLeft,
+} from "lucide-react";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    dealership: '',
-    brand: '',
-  })
-  const [loading, setLoading] = useState(false)
-  const { signup } = useAuth()
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    dealership: "",
+    brand: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const { signup } = useAuth();
 
-
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const { firstName, lastName, email, password, dealership, brand } = formData
-    if (!firstName || !lastName || !email || !password || !dealership || !brand) {
-      toast.error('All fields are required')
-      return
+    e.preventDefault();
+
+    const { firstName, lastName, email, password, dealership, brand } =
+      formData;
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !dealership ||
+      !brand
+    ) {
+      toast.error("All fields are required");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      await signup(formData)
-      toast.success('Account created successfully. Redirecting to login...')
+      await signup(formData);
+      toast.success("Account created successfully. Redirecting to login...");
     } catch (error: any) {
-      toast.error(error.message || 'Registration failed. Please check your data.')
+      toast.error(
+        error.message || "Registration failed. Please check your data.",
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[#060D1A] overflow-hidden py-12">
@@ -61,7 +79,7 @@ export default function SignupPage() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, type: 'spring' }}
+            transition={{ duration: 0.5, type: "spring" }}
             className="flex items-center justify-center w-12 h-12 rounded-2xl bg-cyan-500 cyan-glow mb-3"
           >
             <Zap className="w-6 h-6 text-white" />
@@ -74,14 +92,6 @@ export default function SignupPage() {
           >
             Create Your Account
           </motion.h1>
-          <motion.p
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            className="text-sm text-slate-400 mt-1"
-          >
-            OmniSuiteAI outbound engagement platform
-          </motion.p>
         </div>
 
         {/* Card */}
@@ -92,7 +102,10 @@ export default function SignupPage() {
           className="bg-[#0F1A2E]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-8 card-shadow"
         >
           <div className="flex items-center gap-2 mb-6">
-            <Link href="/login" className="text-slate-400 hover:text-white transition-colors">
+            <Link
+              href="/login"
+              className="text-slate-400 hover:text-white transition-colors"
+            >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <h2 className="text-lg font-semibold text-white">Signup</h2>
@@ -228,8 +241,6 @@ export default function SignupPage() {
               </div>
             </div>
 
-
-
             <button
               type="submit"
               disabled={loading}
@@ -238,19 +249,22 @@ export default function SignupPage() {
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </button>
           </form>
 
           <div className="mt-6 text-center text-xs text-slate-400">
-            Already have an account?{' '}
-            <Link href="/login" className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline"
+            >
               Login
             </Link>
           </div>
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
