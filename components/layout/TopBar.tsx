@@ -115,54 +115,7 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
             )}
           </button>
 
-          {/* Notifications */}
-          <DropdownMenu>
-            <DropdownMenuTrigger className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-border bg-background hover:bg-muted transition-colors">
-              <Bell className="w-4 h-4 text-muted-foreground" />
-              {unreadCount > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-cyan-500 text-white text-[9px] font-bold"
-                >
-                  {unreadCount}
-                </motion.span>
-              )}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 rounded-2xl p-2">
-              <DropdownMenuLabel className="flex items-center justify-between px-2 pb-2">
-                <span className="font-semibold text-sm">Notifications</span>
-                <Badge variant="secondary" className="text-[10px]">
-                  {unreadCount} new
-                </Badge>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {notifications.slice(0, 4).map((n) => (
-                <DropdownMenuItem
-                  key={n.id}
-                  className="flex flex-col items-start gap-0.5 rounded-xl p-3 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 w-full">
-                    {!n.read && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shrink-0" />
-                    )}
-                    <span
-                      className={`text-xs font-medium ${!n.read ? "" : "text-muted-foreground ml-3.5"}`}
-                    >
-                      {n.title}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground line-clamp-1 ml-3.5">
-                    {n.message}
-                  </p>
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center text-xs text-primary font-medium py-2 rounded-xl cursor-pointer">
-                View all notifications
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        
 
           {/* Profile */}
           <DropdownMenu>
