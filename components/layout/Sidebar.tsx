@@ -105,29 +105,6 @@ export function Sidebar({ isOpen = true }: SidebarProps) {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-white/8">
-          {/* <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-cyan-500 shrink-0">
-            <Zap className="w-5 h-5 text-white" />
-          </div> */}
-{/*           
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.15 }}
-                className="flex flex-col min-w-0"
-              >
-                <span className="text-white font-semibold text-sm leading-tight truncate">
-                  OmniSuiteAI
-                </span>
-                <span className="text-slate-400 text-xs truncate">
-                  Patterson Cheney
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence> */}
-
           <img src="/logo.png" alt="Logo" />
         </div>
 
