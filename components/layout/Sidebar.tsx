@@ -104,8 +104,26 @@ export function Sidebar({ isOpen = true }: SidebarProps) {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-5 border-b border-white/8">
+        {/* <div className="flex items-center gap-3 px-4 py-5 border-b border-white/8">
           <img src="/logo.png" alt="Logo" />
+        </div> */}
+
+        {/* Logo */}
+        {/* Logo */}
+        <div
+          className={cn(
+            "flex items-center border-b border-white/8",
+            collapsed ? "justify-center px-2 py-5" : "px-4 py-5",
+          )}
+        >
+          <img
+            src={collapsed ? "/loooogo.png" : "/logo.png"}
+            alt="Logo"
+            className={cn(
+              "transition-all duration-300",
+              collapsed ? "w-10 h-10 object-contain" : "h-10 w-auto",
+            )}
+          />
         </div>
 
         {/* Navigation */}
