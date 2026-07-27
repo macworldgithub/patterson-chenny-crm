@@ -76,13 +76,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           lastName: 'User',
           fullName: email.split('@')[0],
           email: email,
-          role: 'super_admin',
+          role: 'admin',
           status: 'active',
-          dealership: 'Patterson Cheney Head Office',
-          brand: 'Toyota',
+          branch: 'Unknown',
           lastLogin: new Date().toISOString(),
           createdAt: new Date().toISOString(),
-          permissions: [],
           activityCount: 1,
         }
       }

@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
   const userName = user?.firstName ? `${user.firstName}` : 'Welcome'
   const greetingText = user?.firstName ? `Welcome, ${user.firstName}` : 'Welcome '
-  const isSuperAdmin = user?.role === 'super_admin'
+  const isSuperAdmin = user?.role && 'super_admin'
 
   useEffect(() => {
     const load = async () => {
@@ -125,7 +125,7 @@ export default function DashboardPage() {
         setAuditLogs(isSuperAdmin ? auditData.data : []);
       } catch (err: any) {
         console.error(err);
-        setError(err.message || 'Failed to load dashboard');
+        setError(err?.message || 'Failed to load dashboard');
       } finally {
         setLoading(false);
       }
@@ -398,9 +398,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom Row */}
-      {isSuperAdmin && (
+      {/* {isSuperAdmin && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Activity Feed */}
+
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -438,7 +438,7 @@ export default function DashboardPage() {
             </div>
           </motion.div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

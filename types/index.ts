@@ -129,7 +129,7 @@ export interface Call {
   }
   confidenceScore: number
   agentName: string
-  dealershipLocation: string
+  branch: string
   brand: string
   createdAt: string
 }
@@ -172,7 +172,7 @@ export interface FunnelStage {
 
 // ─── User & Auth Types ─────────────────────────────────────────────────────────
 
-export type UserRole = 'super_admin' | 'admin' | 'manager' | 'agent' | 'viewer' | 'finance'
+export type UserRole = 'admin'
 export type UserStatus = 'active' | 'inactive' | 'pending' | 'suspended'
 
 export interface User {
@@ -184,11 +184,9 @@ export interface User {
   role: UserRole
   status: UserStatus
   avatar?: string
-  dealership: string
-  brand: string
+  branch: string
   lastLogin: string
   createdAt: string
-  permissions: Permission[]
   activityCount: number
 }
 

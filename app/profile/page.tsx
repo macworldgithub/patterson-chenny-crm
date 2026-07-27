@@ -9,7 +9,6 @@ import {
   Lock,
   Mail,
   Building2,
-  Car,
   Save,
   Eye,
   EyeOff,
@@ -37,8 +36,7 @@ export default function ProfilePage() {
   // ── Profile form state ──
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [dealership, setDealership] = useState('')
-  const [brand, setBrand] = useState('')
+  const [branch, setBranch] = useState('')
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileErrors, setProfileErrors] = useState<FieldError>({})
 
@@ -57,8 +55,7 @@ export default function ProfilePage() {
     if (user) {
       setFirstName(user.firstName || '')
       setLastName(user.lastName || '')
-      setDealership(user.dealership || '')
-      setBrand(user.brand || '')
+      setBranch(user.branch || '')
     }
   }, [user])
 
@@ -88,7 +85,7 @@ export default function ProfilePage() {
     setProfileErrors({})
     setProfileLoading(true)
     try {
-      await updateProfile({ firstName: firstName.trim(), lastName: lastName.trim(), dealership: dealership.trim(), brand: brand.trim() } as any)
+      await updateProfile({ firstName: firstName.trim(), lastName: lastName.trim() } as any)
       toast.success('Your profile has been updated successfully.')
     } catch (err: any) {
       toast.error(err.message || 'Failed to update profile')
@@ -212,7 +209,7 @@ export default function ProfilePage() {
                 <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
                   <div>
                     <h2 className="text-base font-semibold text-foreground mb-1">Personal Information</h2>
-                    <p className="text-xs text-muted-foreground">Update your name and dealership details.</p>
+                    <p className="text-xs text-muted-foreground">Update your name and contact details.</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -292,42 +289,22 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    {/* Dealership */}
-                    <div>
+                    {/* Dealership Location (Branch) — read-only */}
+                    <div className="sm:col-span-2">
                       <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                        Dealership
+                        Dealership Location <span className="normal-case text-muted-foreground/60 font-normal ml-1">(branch — contact admin to change)</span>
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
                           <Building2 className="w-4 h-4" />
                         </div>
                         <input
-                          id="profile-dealership"
+                          id="profile-branch"
                           type="text"
-                          value={dealership}
-                          onChange={(e) => setDealership(e.target.value)}
-                          className="block w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                          placeholder="Patterson Cheney Head Office"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Brand */}
-                    <div>
-                      <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                        Brand
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-                          <Car className="w-4 h-4" />
-                        </div>
-                        <input
-                          id="profile-brand"
-                          type="text"
-                          value={brand}
-                          onChange={(e) => setBrand(e.target.value)}
-                          className="block w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                          placeholder="Toyota"
+                          value={branch}
+                          readOnly
+                          className="block w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-muted-foreground text-sm cursor-not-allowed"
+                          placeholder="e.g. Keysborough"
                         />
                       </div>
                     </div>

@@ -135,7 +135,7 @@ export function TopBar({ onMenuToggle, isSidebarOpen = false }: TopBarProps) {
                     {user ? `${user.firstName} ${user.lastName}` : 'Guest User'}
                   </span>
                   <span className="text-xs text-muted-foreground capitalize truncate">
-                    {user ? user.role.replace('_', ' ') : 'Guest'} · {user ? user.dealership : 'Dealer'}
+                    {user ? user.role.replace('_', ' ') : 'Guest'} · {user ? (user.branch || 'Unknown Branch') : 'Dealer'}
                   </span>
                 </div>
               </DropdownMenuLabel>
