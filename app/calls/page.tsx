@@ -196,7 +196,7 @@ export default function CallsPage() {
                 </td>
                 <td className="px-4 py-3.5 hidden lg:table-cell">
                   <p className="text-xs text-foreground truncate max-w-[180px]">{call.campaignName}</p>
-                  <p className="text-[11px] text-muted-foreground">{call.brand} · {call.dealershipLocation}</p>
+                  <p className="text-[11px] text-muted-foreground">{call.brand} · {call.branch}</p>
                 </td>
                 <td className="px-4 py-3.5 hidden md:table-cell">
                   <p className="text-xs text-foreground">{new Date(call.startTime).toLocaleDateString('en-AU')}</p>

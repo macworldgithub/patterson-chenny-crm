@@ -139,8 +139,6 @@ export default function CampaignsPage() {
           name: formData.name || "New Campaign",
           type: (formData.type as any) || "service_reminder",
           status: (formData.status as any) || "draft",
-          brand: formData.brand || "Toyota",
-          location: formData.location || "HQ",
           totalContacts: 0,
           contactsAttempted: 0,
           contactsReached: 0,
@@ -644,21 +642,6 @@ export default function CampaignsPage() {
                   }
                   placeholder="e.g. Winter Service Drive"
                 />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1 block">Brand</label>
-                <select
-                  className="w-full flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0A0F1E]"
-                  value={formData.brand || "Toyota"}
-                  onChange={(e) =>
-                    setFormData({ ...formData, brand: e.target.value })
-                  }
-                >
-                  <option value="Toyota">Toyota</option>
-                  <option value="Mercedes-Benz">Mercedes-Benz</option>
-                  <option value="Isuzu UTE">Isuzu UTE</option>
-                  <option value="Mahindra">Mahindra</option>
-                </select>
               </div>
               <div>
                 <label className="text-sm font-medium mb-1 block">
