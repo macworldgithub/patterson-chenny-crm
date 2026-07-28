@@ -6,6 +6,8 @@ import {
   Calendar,
   Percent,
   UserPlus,
+  Users,
+  Layers,
   Coins,
   PhoneCall,
   ChevronRight,
@@ -32,6 +34,8 @@ import {
 import { fetchDashboardStats, fetchDailyMetrics } from '@/lib/analytics-api'
 import { fetchCallStats } from '@/lib/calls-api'
 import { fetchAuditLogs } from '@/lib/audit-api'
+import { fetchCampaigns } from '@/lib/campaigns-api'
+import { fetchCustomers } from '@/lib/customers-api'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
@@ -89,6 +93,8 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [callStats, setCallStats] = useState<any>(null);
   const [dailyMetrics, setDailyMetrics] = useState<any[]>([]);
+  const [campaignCount, setCampaignCount] = useState<number | null>(null);
+  const [customerCount, setCustomerCount] = useState<number | null>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [showAllActivity, setShowAllActivity] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,6 +111,8 @@ export default function DashboardPage() {
           fetchDashboardStats(),
           fetchCallStats(),
           fetchDailyMetrics(30),
+          fetchCampaigns(),
+          fetchCustomers({ limit: 1 }),
         ]
 
         if (isSuperAdmin) {
@@ -117,11 +125,13 @@ export default function DashboardPage() {
         }
 
         const results = await Promise.all(requests)
-        const [statsData, callStatsData, dailyData, auditData] = results
+        const [statsData, callStatsData, dailyData, campaignsData, customersData, auditData] = results
 
         setStats(statsData);
         setCallStats(callStatsData);
         setDailyMetrics(dailyData);
+        setCampaignCount(Array.isArray(campaignsData) ? campaignsData.length : 0);
+        setCustomerCount(customersData?.total ?? 0);
         setAuditLogs(isSuperAdmin ? auditData.data : []);
       } catch (err: any) {
         console.error(err);
@@ -165,7 +175,7 @@ export default function DashboardPage() {
       change: 0,
       changeType: "neutral" as const,
       icon: PhoneCall,
-      color: "cyan" as const,
+      color: "teal" as const,
       changePeriod: "overall",
     },
     {
@@ -194,6 +204,24 @@ export default function DashboardPage() {
       icon: UserPlus,
       color: "amber" as const,
       changePeriod: "currently active",
+    },
+    {
+      title: "Total Campaigns",
+      value: campaignCount ?? 0,
+      change: 0,
+      changeType: "neutral" as const,
+      icon: Layers,
+      color: "purple" as const,
+      changePeriod: "all campaigns",
+    },
+    {
+      title: "Total Customers",
+      value: customerCount ?? 0,
+      change: 0,
+      changeType: "neutral" as const,
+      icon: Users,
+      color: "amber" as const,
+      changePeriod: "all customers",
     },
   ];
 

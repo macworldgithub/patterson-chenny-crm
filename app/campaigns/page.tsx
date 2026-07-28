@@ -186,7 +186,28 @@ export default function CampaignsPage() {
     );
   };
 
+  const validateDateRange = () => {
+    const { startDate, endDate } = formData;
+    if (!startDate || !endDate) {
+      return null;
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return null;
+    }
+
+    return start >= end ? "Start date must be earlier than end date." : null;
+  };
+
   const handleSaveCampaign = async () => {
+    const dateValidationError = validateDateRange();
+    if (dateValidationError) {
+      alert(dateValidationError);
+      return;
+    }
+
     try {
       setIsSaving(true);
       if (editingCampaign) {
@@ -859,7 +880,12 @@ export default function CampaignsPage() {
                     }
                   />
                 </div>
-              </div>
+              </div>  
+              {validateDateRange() ? (
+                <p className="text-xs text-destructive mt-1">
+                  {validateDateRange()}
+                </p>
+              ) : null}
             </div>
             <div className="mt-8 flex gap-3">
               <Button
@@ -872,7 +898,7 @@ export default function CampaignsPage() {
               <Button
                 className="flex-1 bg-[#0C1E3C] hover:bg-[#1A3A6B] text-white"
                 onClick={handleSaveCampaign}
-                disabled={isSaving}
+                disabled={isSaving || Boolean(validateDateRange())}
               >
                 {isSaving ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block align-middle" />
