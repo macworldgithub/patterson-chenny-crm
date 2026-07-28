@@ -175,7 +175,7 @@ export default function DashboardPage() {
       change: 0,
       changeType: "neutral" as const,
       icon: PhoneCall,
-      color: "cyan" as const,
+      color: "teal" as const,
       changePeriod: "overall",
     },
     {

@@ -50,6 +50,13 @@ const colorMap = {
     glow: 'from-purple-500/15',
     ring: 'group-hover:ring-purple-500/30',
   },
+  teal: {
+  bg: 'bg-teal-50 dark:bg-teal-950/30',
+  icon: 'text-teal-600 dark:text-teal-400',
+  badge: 'bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300',
+  glow: 'from-teal-500/15',
+  ring: 'group-hover:ring-teal-500/30',
+},
 }
 
 interface StatCardProps {
