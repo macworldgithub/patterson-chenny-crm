@@ -681,6 +681,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 import {
   Search, Download, Filter, ChevronRight, ChevronLeft,
   Star, Phone, Car, CalendarClock, MoreHorizontal, Plus, Upload, Loader2,
@@ -755,7 +756,12 @@ export default function CustomersPage() {
   }, [load, search])
 
   const handleExport = async () => {
-    try { await exportCustomersCSV() } catch (e: any) { alert('Export failed: ' + e.message) }
+    try { 
+      await exportCustomersCSV() 
+      toast.success("CSV exported successfully")
+    } catch (e: any) { 
+      toast.error('Export failed: ' + e.message) 
+    }
   }
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -765,8 +771,9 @@ export default function CustomersPage() {
     try {
       await importCustomersCSV(file)
       await load()
+      toast.success("Customers imported successfully")
     } catch (e: any) {
-      alert('Import failed: ' + e.message)
+      toast.error('Import failed: ' + e.message)
     } finally {
       setImporting(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -825,28 +832,39 @@ export default function CustomersPage() {
             : {}),
         }
         await updateCustomer(editingCustomer.id, updates)
+        toast.success(`Customer "${updates.fullName}" updated`)
       } else {
         await createCustomer(payload)
+        toast.success(`Customer "${payload.firstName} ${payload.lastName}" created`)
       }
       await load()
       setIsFormOpen(false)
       setEditingCustomer(null)
       setFormData({})
     } catch (e: any) {
-      alert('Save failed: ' + e.message)
+      toast.error('Save failed: ' + e.message)
     } finally {
       setSaving(false)
     }
   }
 
-  const handleDeleteCustomer = async (id: string) => {
-    if (!confirm('Delete this customer?')) return
-    try {
-      await deleteCustomer(id)
-      await load()
-    } catch (e: any) {
-      alert('Delete failed: ' + e.message)
-    }
+  const handleDeleteCustomer = async (id: string, name: string) => {
+    toast(`Delete "${name}"?`, {
+      description: "This action cannot be undone.",
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            await deleteCustomer(id)
+            await load()
+            toast.success(`Customer "${name}" deleted`)
+          } catch (e: any) {
+            toast.error('Delete failed: ' + e.message)
+          }
+        },
+      },
+      cancel: { label: "Cancel", onClick: () => {} },
+    });
   }
 
   const openEditForm = (customer: Customer) => {
@@ -1007,7 +1025,7 @@ export default function CustomersPage() {
                         <DropdownMenuContent className="rounded-xl">
                           <DropdownMenuItem onClick={() => openEditForm(customer)}>Edit Customer</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteCustomer(customer.id)}>
+                          <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteCustomer(customer.id, customer.fullName)}>
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>

@@ -8,20 +8,51 @@ function normalise(c: any): Campaign {
 export interface GetCampaignsParams {
   status?: string
   brand?: string
+  location?: string
   type?: string
   search?: string
+  page?: number
+  limit?: number
 }
 
-export async function fetchCampaigns(params: GetCampaignsParams = {}): Promise<Campaign[]> {
+export interface PaginationMeta {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export interface CampaignsResponse {
+  data: Campaign[]
+  pagination: PaginationMeta
+}
+
+export async function fetchCampaigns(params: GetCampaignsParams = {}): Promise<CampaignsResponse> {
   const query = new URLSearchParams()
   if (params.status && params.status !== 'all') query.set('status', params.status)
   if (params.brand && params.brand !== 'all') query.set('brand', params.brand)
+  if (params.location && params.location !== 'all') query.set('location', params.location)
   if (params.type && params.type !== 'all') query.set('type', params.type)
   if (params.search) query.set('search', params.search)
-  
+  if (params.page) query.set('page', String(params.page))
+  if (params.limit) query.set('limit', String(params.limit))
+
   const res = await apiFetch(`/campaigns?${query.toString()}`)
-  return res.data.map(normalise)
+
+  // The API returns: { success, data: [...], count, page, limit, total, totalPages }
+  // Pagination fields are at the ROOT of the response, not inside a nested object.
+  const items: Campaign[] = (Array.isArray(res.data) ? res.data : []).map(normalise)
+
+  const pagination: PaginationMeta = {
+    total:      res.total      ?? items.length,
+    page:       res.page       ?? params.page ?? 1,
+    limit:      res.limit      ?? params.limit ?? 10,
+    totalPages: res.totalPages ?? 1,
+  }
+
+  return { data: items, pagination }
 }
+
 
 export async function fetchCampaignById(id: string): Promise<Campaign> {
   const res = await apiFetch(`/campaigns/${id}`)
